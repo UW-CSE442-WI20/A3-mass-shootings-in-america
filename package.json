@@ -11,5 +11,9 @@
   "author": "",
   "devDependencies": {
     "parcel-bundler": "^1.12.4"
+  },
+  "dependencies": {
+    "public": "^0.1.5",
+    "us-atlas": "^3.0.0"
   }
 }
