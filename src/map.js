@@ -1,4 +1,3 @@
-var data = require("./us-states.json");
 var topology = require("./us-states.json");
 var width = 975;
 var height = 610;
@@ -16,7 +15,8 @@ var map = d3
   .append("svg")
   .attr("width", width)
   .attr("height", height)
-  .attr("id", "map");
+  .attr("id", "map")
+  .attr("class", "tooltip");
 
 // Adding usa border
 map
@@ -31,10 +31,9 @@ map
   .attr("d", path(topojson.feature(topology, topology.objects.states)));
 
 var tooltip = d3
-  .select("map")
+  .select("body")
   .append("div")
-  .attr("class", "tooltip")
-  .style("opacity", 0);
+  .attr("class", "tooltip");
 
 // Adding points
 var coordinates = [];
@@ -47,25 +46,26 @@ d3.csv(data, function(row) {
     .append("circle")
     .attr("cx", x)
     .attr("cy", y)
-    .attr("r", Math.sqrt(row.total_victims))
+    .attr("r", Math.sqrt(row.fatalities) * 2)
     .attr("fill", "red")
     .attr("opacity", 1)
     .on("mouseover", function() {
       d3.select(this).attr("opacity", 0.8);
+
+      tooltip.transition().duration(500);
       tooltip
         .text(row.case)
-        .attr("opacity", 0.6)
-        .attr("x", d3.event.pageX)
-        .attr("y", d3.event.pageY)
-        .transition()
-        .duration(200);
+        .style("left", d3.event.pageX + 5 + "px")
+        .style("top", d3.event.pageY - 20 + "px")
+        .attr("opacity", 1)
+        .attr("id", row.case);
     })
     .on("mouseout", function() {
       d3.select(this).attr("opacity", 1);
       tooltip
         .transition()
         .duration(500)
-        .attr("opacity", 0);
+        .style("opactity", 0);
     });
   coordinates.push([x, y]);
 });

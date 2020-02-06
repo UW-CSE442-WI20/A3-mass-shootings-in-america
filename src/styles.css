@@ -20,15 +20,14 @@ h1 {
 }
 
 div.tooltip {
-  position: absolute;
-  text-align: center;
-  padding: 2px;
-  font: 10px;
-  background-color: white;
-  text-anchor: middle;
+  background-color: lightgray;
   border: 12px;
   border-radius: 8px;
+  padding: 5px;
   pointer-events: none;
+  position: absolute;
+  text-align: center;
+  font-size: 10pt;
 }
 
 .feature {
