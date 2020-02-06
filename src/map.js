@@ -1,10 +1,16 @@
+var data = require("./us-states.json");
 var topology = require("./us-states.json");
 var width = 975;
 var height = 610;
 
+var projection = d3
+  .geoAlbersUsa()
+  .scale(1300)
+  .translate([487.5, 305]);
+
 var path = d3.geoPath();
 
-// initialize svg object
+// Initialize svg object
 var map = d3
   .select("body")
   .append("svg")
@@ -12,13 +18,13 @@ var map = d3
   .attr("height", height)
   .attr("id", "map");
 
-// add usa border
+// Adding usa border
 map
   .append("path")
   .attr("class", "map")
   .attr("d", path(topojson.feature(topology, topology.objects.nation)));
 
-// add state borders
+// Adding state borders
 map
   .append("path")
   .attr("class", "map")
@@ -30,12 +36,7 @@ var tooltip = d3
   .attr("class", "tooltip")
   .style("opacity", 0);
 
-var projection = d3
-  .geoAlbersUsa()
-  .scale(1300)
-  .translate([487.5, 305]);
-
-// add data points
+// Adding points
 var coordinates = [];
 var data = require("./data.csv");
 d3.csv(data, function(row) {
