@@ -22,12 +22,11 @@ h1 {
 div.tooltip {
   background-color: lightgray;
   border: 12px;
-  border-radius: 8px;
+  font-size: 10pt;
   padding: 5px;
   pointer-events: none;
   position: absolute;
-  text-align: center;
-  font-size: 10pt;
+  text-align: left;
 }
 
 .feature {

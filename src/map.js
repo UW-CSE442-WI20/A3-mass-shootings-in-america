@@ -30,10 +30,12 @@ map
   .attr("class", "map")
   .attr("d", path(topojson.feature(topology, topology.objects.states)));
 
+var infoWindowOpen;
 var tooltip = d3
   .select("body")
   .append("div")
-  .attr("class", "tooltip");
+  .attr("class", "tooltip")
+  .on("mouseon", (infoWindowOpen = true));
 
 // Adding points
 var coordinates = [];
@@ -50,22 +52,35 @@ d3.csv(data, function(row) {
     .attr("fill", "red")
     .attr("opacity", 1)
     .on("mouseover", function() {
-      d3.select(this).attr("opacity", 0.8);
-
-      tooltip.transition().duration(500);
+      d3.select(this).attr("opacity", 0.6);
       tooltip
-        .text(row.case)
+        .html(row.case)
         .style("left", d3.event.pageX + 5 + "px")
         .style("top", d3.event.pageY - 20 + "px")
-        .attr("opacity", 1)
-        .attr("id", row.case);
+        .style("opacity", 1);
     })
     .on("mouseout", function() {
       d3.select(this).attr("opacity", 1);
-      tooltip
-        .transition()
-        .duration(500)
-        .style("opactity", 0);
+      if (!infoWindowOpen) {
+        tooltip.html("").style("opacity", 0);
+      }
+    })
+    .on("click", function() {
+      d3.select(this).attr("opacity", 0.6);
+      tooltip.transition().ease();
+      tooltip.html(
+        "<b>" +
+          row.case +
+          "</b><br>(" +
+          row.location +
+          ")" +
+          "<br><br>Fatalities: " +
+          row.fatalities +
+          "<br>Injuries: " +
+          row.injured +
+          "<br><br><a href=" +
+          row.sources +
+          ">More info</a>"
+      );
     });
-  coordinates.push([x, y]);
 });
