@@ -1,8 +1,8 @@
 {
   "version": 3,
   "sources": [
-    "index.js",
-    "map.js"
+    "index.js"
+    "map.js",
   ],
   "names": [
     "console",
