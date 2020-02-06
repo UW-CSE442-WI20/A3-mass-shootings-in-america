@@ -8,29 +8,27 @@
 	<script src="https://d3js.org/d3.v5.min.js" charset="utf-8"></script>
 	<script src="https://d3js.org/topojson.v3.min.js"></script>
 	<link rel="stylesheet" href="./styles.css">
-	
+
+	<h1>Mass Shootings in America</h1>
+	<h2>An analysis of mass shootings in the United States from 1982 - present</h2>
 </head>
 
 <body>
 	<script src="./map.js"></script>
 	<script src="./index.js"></script>
-	<h1>Mass Shootings in America</h1>
 	<div style="display: flex; justify-content: space-evenly; flex-direction: column; align-items: center;">
-		<div id="map" >
-
-		</div>
-	
-		<br/>
+		<div id="map"></div>
+		<br />
 		<form id="slider_container" style="width: 750px;">
 			<label id="slider_year" for="Slider" style="color: white;"></label>
 			<input type="range" class="custom-range" step="1" id="slider">
 		</form>
 		<button id="all_years_button">Show All Years</button>
 	</div>
-	
-	
-	
-	
+
+
+
+
 </body>
 
 </html>
