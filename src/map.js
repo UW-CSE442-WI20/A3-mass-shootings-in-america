@@ -1,9 +1,10 @@
 import "regenerator-runtime/runtime";
+
 var topology = require("./us-states.json");
+var map, tooltip;
 var width = 975,
   height = 610,
   focus = d3.select(null);
-
 var defaultView = viewToString(0, 0, width, height);
 
 var projection = d3
@@ -33,23 +34,23 @@ async function parseData() {
   });
 }
 
-// Initialize svg object
-var map = d3
-  .select("#map")
-  .append("svg")
-  .attr("width", width)
-  .attr("height", height)
-  .attr("viewBox", defaultView)
-  .attr("preserveAspectRatio", "xMidYMid slice")
-  .attr("id", "map")
-  .on("click", zoom);
-
-var tooltip = d3
-  .select("#map")
-  .append("div")
-  .attr("class", "tooltip");
-
 async function renderMap() {
+  // Initialize svg object
+  map = d3
+    .select("#map")
+    .append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .attr("viewBox", defaultView)
+    .attr("preserveAspectRatio", "xMidYMid slice")
+    .attr("id", "map")
+    .on("click", handleClick);
+
+  tooltip = d3
+    .select("#map")
+    .append("div")
+    .attr("class", "tooltip");
+
   // Adding usa border
   map
     .append("path")
@@ -68,13 +69,15 @@ async function renderMap() {
     let x = projection(coord)[0],
       y = projection(coord)[1];
 
-    map
+    // Adding circles
+    var p = map
       .append("circle")
       .attr("cx", x)
       .attr("cy", y)
       .attr("r", Math.sqrt(row.fatalities) * 2)
       .attr("fill", "red")
       .attr("opacity", 1)
+      .attr("id", "point")
       .on("mouseover", function() {
         d3.select(this).attr("opacity", 0.6);
         tooltip
@@ -87,36 +90,38 @@ async function renderMap() {
         d3.select(this).attr("opacity", 1);
         tooltip.html("").style("opacity", 0);
       })
-      .on("click", zoom);
+      .on("click", handleClick);
   }
 }
 
-function zoom() {
-  var newView;
-  if (focus.node() === this || this["id"] == "map") {
-    newView = defaultView;
+function handleClick() {
+  if (focus.node() === this || this["id"] !== "point") {
+    // reset to default view
+    zoom(defaultView);
     focus = d3.select(null);
   } else {
+    // zoom in
     focus = d3.select(this);
     event.stopPropagation();
     let x = focus._groups[0][0]["cx"].baseVal.value,
       y = focus._groups[0][0]["cy"].baseVal.value,
       size = 500;
-    newView = viewToString(x - size / 2, y - size / 2, size, size);
+    let view = viewToString(x - size / 2, y - size / 2, size, size);
+    zoom(view);
   }
+}
 
+function zoom(view) {
   map
     .transition()
     .duration(750)
-    .attr("viewBox", newView);
+    .attr("viewBox", view);
 }
 
-// minX, minY, maxX, maxY
 function viewToString(x1, y1, x2, y2) {
   return x1 + " " + y1 + " " + x2 + " " + y2;
 }
 
-/********** Slider ***********/
 async function initSlider() {
   var slider_label = document.getElementById("slider_year");
   var slider = document.getElementById("slider");
