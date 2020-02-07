@@ -2,9 +2,10 @@ import "regenerator-runtime/runtime";
 var topology = require("./us-states.json");
 var width = 975,
   height = 610,
-  centered;
+  focus = d3.select(null);
 
-var defaultView = "0 0 " + width + " " + height;
+var defaultView = viewToString(0, 0, width, height);
+
 var projection = d3
   .geoAlbersUsa()
   .scale(1300)
@@ -32,18 +33,23 @@ async function parseData() {
   });
 }
 
-var zoomed = false;
-async function renderMap() {
-  // Initialize svg object
-  var map = d3
-    .select("#map")
-    .append("svg")
-    .attr("width", width)
-    .attr("height", height)
-    .attr("id", "map")
-    .attr("viewBox", defaultView)
-    .attr("preserveAspectRatio", "xMidYMid meet");
+// Initialize svg object
+var map = d3
+  .select("#map")
+  .append("svg")
+  .attr("width", width)
+  .attr("height", height)
+  .attr("viewBox", defaultView)
+  .attr("preserveAspectRatio", "xMidYMid slice")
+  .attr("id", "map")
+  .on("click", zoom);
 
+var tooltip = d3
+  .select("#map")
+  .append("div")
+  .attr("class", "tooltip");
+
+async function renderMap() {
   // Adding usa border
   map
     .append("path")
@@ -55,11 +61,6 @@ async function renderMap() {
     .append("path")
     .attr("class", "map")
     .attr("d", path(topojson.feature(topology, topology.objects.states)));
-
-  var tooltip = d3
-    .select("body")
-    .append("div")
-    .attr("class", "tooltip");
 
   for (let i = 0; i < curData.length; i++) {
     let row = curData[i];
@@ -86,25 +87,36 @@ async function renderMap() {
         d3.select(this).attr("opacity", 1);
         tooltip.html("").style("opacity", 0);
       })
-      .on("click", function() {
-        if (zoomed) {
-          zoomed = false;
-          map
-            .transition()
-            .duration(300)
-            .attr("viewBox", defaultView);
-        } else {
-          zoomed = true;
-          let center = "" + d3.event.pageX / 2 + " " + d3.event.pageY / 2 + " ";
-          map
-            .transition()
-            .duration(300)
-            .attr("viewBox", center + " " + center);
-        }
-      });
+      .on("click", zoom);
   }
 }
 
+function zoom() {
+  var newView;
+  if (focus.node() === this || this["id"] == "map") {
+    newView = defaultView;
+    focus = d3.select(null);
+  } else {
+    focus = d3.select(this);
+    event.stopPropagation();
+    let x = focus._groups[0][0]["cx"].baseVal.value,
+      y = focus._groups[0][0]["cy"].baseVal.value,
+      size = 500;
+    newView = viewToString(x - size / 2, y - size / 2, size, size);
+  }
+
+  map
+    .transition()
+    .duration(750)
+    .attr("viewBox", newView);
+}
+
+// minX, minY, maxX, maxY
+function viewToString(x1, y1, x2, y2) {
+  return x1 + " " + y1 + " " + x2 + " " + y2;
+}
+
+/********** Slider ***********/
 async function initSlider() {
   var slider_label = document.getElementById("slider_year");
   var slider = document.getElementById("slider");
@@ -141,24 +153,3 @@ async function init() {
 }
 
 init();
-// Manage slider
-
-function openInfoWindow(row) {
-  infoWindow.transition().ease();
-  infoWindow
-    .toggle()
-    .html(
-      "<b>" +
-        row.case +
-        "</b><br>(" +
-        row.location +
-        ")" +
-        "<br><br>Fatalities: " +
-        row.fatalities +
-        "<br>Injuries: " +
-        row.injured +
-        "<br><br><a href=" +
-        row.sources +
-        ">More info</a>"
-    );
-}
