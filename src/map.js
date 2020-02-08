@@ -1,12 +1,25 @@
 import "regenerator-runtime/runtime";
 
+var filters = {
+  fatalities: {
+    img: "https://img.icons8.com/ios-glyphs/30/000000/self-destruct-button.png",
+    col: 1
+  },
+  weapon: { img: "https://img.icons8.com/metro/26/000000/gun.png", col: 2 },
+  age: { img: "https://img.icons8.com/metro/26/000000/age.png", col: 3 },
+  gender: {
+    img: "https://img.icons8.com/metro/26/000000/gender--v1.png",
+    col: 4
+  }
+};
 var topology = require("./us-states.json");
-var map, tooltip;
+var map, tooltip, info, legend;
 var width = 975,
   height = 610,
   focus = d3.select(null);
 var defaultView = viewToString(0, 0, width, height);
 
+var currentFilter;
 var projection = d3
   .geoAlbersUsa()
   .scale(1300)
@@ -20,6 +33,7 @@ var largest_year = 0;
 var allData = [];
 var curData = [];
 var year_to_data = {};
+var coord_to_data = {};
 
 async function parseData() {
   await d3.csv(data, async function(row) {
@@ -50,6 +64,12 @@ async function renderMap() {
     .select("#map")
     .append("div")
     .attr("class", "tooltip");
+
+  info = d3
+    .select("#map")
+    .append("div")
+    .attr("class", "info")
+    .attr("height", "0px");
 
   // Adding usa border
   map
@@ -91,31 +111,68 @@ async function renderMap() {
         tooltip.html("").style("opacity", 0);
       })
       .on("click", handleClick);
+    coord_to_data[(Math.round(x), Math.round(y))] = row;
   }
 }
 
 function handleClick() {
   if (focus.node() === this || this["id"] !== "point") {
-    // reset to default view
-    zoom(defaultView);
     focus = d3.select(null);
+    // reset to default view
+    info
+      .html("")
+      .style("padding", 0)
+      .transition()
+      .duration(300)
+      .style("height", 0 + "px");
+    zoom(defaultView);
   } else {
-    // zoom in
     focus = d3.select(this);
     event.stopPropagation();
-    let x = focus._groups[0][0]["cx"].baseVal.value,
-      y = focus._groups[0][0]["cy"].baseVal.value,
+    let x = Math.round(focus._groups[0][0]["cx"].baseVal.value),
+      y = Math.round(focus._groups[0][0]["cy"].baseVal.value),
       size = 500;
+
+    handleWindow(x, y, coord_to_data[(x, y)]);
     let view = viewToString(x - size / 2, y - size / 2, size, size);
     zoom(view);
   }
-}
 
-function zoom(view) {
-  map
-    .transition()
-    .duration(750)
-    .attr("viewBox", view);
+  function zoom(view) {
+    map
+      .transition()
+      .duration(750)
+      .attr("viewBox", view);
+  }
+
+  function handleWindow(x, y, pointData) {
+    var scale = 1.3;
+    x =
+      x < width / 2
+        ? Math.max(x - x * scale, 50)
+        : Math.min(x + x * scale, 700);
+    y =
+      y < height / 2 ? Math.max(y - y * scale, 150) : Math.min(y * scale, 250);
+
+    var externalLink = pointData.sources.split(";")[0];
+    var embedd =
+      "<iframe sandbox=allow-scripts width=400 height=500 src=" +
+      externalLink +
+      "</iframe>";
+
+    info
+      .html(embedd)
+      .style("left", x + "px")
+      .style("top", y + "px")
+      .style("height", 0 + "px")
+      .style("opacity", 0)
+      .style("padding", "5px 5px 5px 5px")
+      .transition()
+      .duration(1000)
+      .style("opacity", 0.9)
+      .style("width", 400 + "px")
+      .style("height", 500 + "px");
+  }
 }
 
 function viewToString(x1, y1, x2, y2) {
@@ -150,9 +207,47 @@ async function initSlider() {
   });
 }
 
+async function initFilter() {
+  d3.select("filter").attr("opacity", 0.2);
+  d3.select("filter")
+    .text("Filters")
+    .attr("class", "desc");
+  legend = d3.select("filter").append("div");
+  let menu = d3
+    .select("filter")
+    .append("div")
+    .attr("class", "menu");
+
+  Object.keys(filters).forEach(function(key) {
+    menu
+      .append("img")
+      .attr("src", filters[key].img)
+      .attr("id", key)
+      .on("click", updateFilter);
+  });
+
+  menu
+    .append("svg")
+    .attr("id", "selector")
+    .attr("class", "selector")
+    .style("grid-column", 4);
+}
+
+function updateFilter() {
+  console.log("here");
+  currentFilter = d3.select(this);
+
+  var move = filters[currentFilter.node()["id"]].col;
+  d3.select("selector")
+    .transition()
+    .duration(400)
+    .style("grid-column", move);
+}
+
 async function init() {
   await parseData();
   curData = allData;
+  await initFilter();
   await renderMap();
   await initSlider();
 }
