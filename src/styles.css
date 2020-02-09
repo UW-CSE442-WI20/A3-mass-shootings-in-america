@@ -81,30 +81,34 @@ div.tooltip {
   pointer-events: none;
   position: absolute;
   text-align: left;
+  text-transform: capitalize;
 }
 
 div.info {
   position: absolute;
+  display: flex;
+  flex-direction: column-reverse;
   border: 12px black;
   background-color: lightslategray;
-  text-align: left;
-  width: 35%;
+  right: 0px;
+  top: 80px;
+  width: 300px;
   margin-top: 0.5em;
   margin-bottom: 0.5em;
 }
 
-.title {
+.info-button {
   text-transform: capitalize;
-  font-size: 24pt;
-}
-
-.desc {
   font-size: 12pt;
   font-weight: bold;
   font-stretch: narrower;
   font-stretch: expanded;
-  padding-left: 10px;
-  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  border: 0px;
+  fill: none;
+  border-radius: 1cm;
+  background-color: none;
 }
 
 .custom-range {
@@ -253,68 +257,71 @@ div.info {
 }
 
 span.multiselect-native-select {
-	position: relative
+  position: relative;
 }
 span.multiselect-native-select select {
-	border: 0!important;
-	clip: rect(0 0 0 0)!important;
-	height: 1px!important;
-	margin: -1px -1px -1px -3px!important;
-	overflow: hidden!important;
-	padding: 0!important;
-	position: absolute!important;
-	width: 1px!important;
-	left: 50%;
-	top: 30px
+  border: 0 !important;
+  clip: rect(0 0 0 0) !important;
+  height: 1px !important;
+  margin: -1px -1px -1px -3px !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  position: absolute !important;
+  width: 1px !important;
+  left: 50%;
+  top: 30px;
 }
 .multiselect-container {
-	position: absolute;
-	list-style-type: none;
-	margin: 0;
-	padding: 0
+  position: absolute;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
 }
 .multiselect-container .input-group {
-	margin: 5px
+  margin: 5px;
 }
-.multiselect-container>li {
-	padding: 0
+.multiselect-container > li {
+  padding: 0;
 }
-.multiselect-container>li>a.multiselect-all label {
-	font-weight: 700
+.multiselect-container > li > a.multiselect-all label {
+  font-weight: 700;
 }
-.multiselect-container>li.multiselect-group label {
-	margin: 0;
-	padding: 3px 20px 3px 20px;
-	height: 100%;
-	font-weight: 700
+.multiselect-container > li.multiselect-group label {
+  margin: 0;
+  padding: 3px 20px 3px 20px;
+  height: 100%;
+  font-weight: 700;
 }
-.multiselect-container>li.multiselect-group-clickable label {
-	cursor: pointer
+.multiselect-container > li.multiselect-group-clickable label {
+  cursor: pointer;
 }
-.multiselect-container>li>a {
-	padding: 0
+.multiselect-container > li > a {
+  padding: 0;
 }
-.multiselect-container>li>a>label {
-	margin: 0;
-	height: 100%;
-	cursor: pointer;
-	font-weight: 400;
-	padding: 3px 0 3px 30px
+.multiselect-container > li > a > label {
+  margin: 0;
+  height: 100%;
+  cursor: pointer;
+  font-weight: 400;
+  padding: 3px 0 3px 30px;
 }
-.multiselect-container>li>a>label.radio, .multiselect-container>li>a>label.checkbox {
-	margin: 0
+.multiselect-container > li > a > label.radio,
+.multiselect-container > li > a > label.checkbox {
+  margin: 0;
 }
-.multiselect-container>li>a>label>input[type=checkbox] {
-	margin-bottom: 5px
+.multiselect-container > li > a > label > input[type="checkbox"] {
+  margin-bottom: 5px;
 }
-.btn-group>.btn-group:nth-child(2)>.multiselect.btn {
-	border-top-left-radius: 4px;
-	border-bottom-left-radius: 4px
+.btn-group > .btn-group:nth-child(2) > .multiselect.btn {
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
 }
-.form-inline .multiselect-container label.checkbox, .form-inline .multiselect-container label.radio {
-	padding: 3px 20px 3px 40px
+.form-inline .multiselect-container label.checkbox,
+.form-inline .multiselect-container label.radio {
+  padding: 3px 20px 3px 40px;
 }
-.form-inline .multiselect-container li a label.checkbox input[type=checkbox], .form-inline .multiselect-container li a label.radio input[type=radio] {
-	margin-left: -20px;
-	margin-right: 0
+.form-inline .multiselect-container li a label.checkbox input[type="checkbox"],
+.form-inline .multiselect-container li a label.radio input[type="radio"] {
+  margin-left: -20px;
+  margin-right: 0;
 }

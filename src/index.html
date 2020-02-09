@@ -6,7 +6,8 @@
 	<title></title>
 	<script src="https://d3js.org/d3.v5.min.js" charset="utf-8"></script>
 	<script src="https://d3js.org/topojson.v3.min.js"></script>
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet"
+		id="bootstrap-css">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 	<!-- Latest compiled and minified CSS -->
@@ -25,13 +26,18 @@
 		<h2>An analysis of mass shootings in the United States from 1982 - present</h2>
 	</header>
 	<script src="./map.js"></script>
-	<button style="position: absolute;top: 15px;right: 10px;" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal"><i class="fa fa-filter" aria-hidden="true"></i></button>
+	<button style="position: absolute;top: 15px;right: 10px;" type="button" class="btn btn-info btn-lg"
+		data-toggle="modal" data-target="#myModal"><i class="fa fa-filter" aria-hidden="true"></i></button>
 	<br>
+	<!-- Main component -->
 	<div style="display: flex; justify-content: space-evenly; flex-direction: column; align-items: center;">
+		<!-- Map-->
 		<div id="map"></div>
 		<br />
+		<!--Histoslider-->
 		<form id="slider_container" style="width: 750px;">
 			<label id="slider_year" for="Slider" style="color: white;"></label>
+			<div class id="histogram"></div>
 			<input type="range" class="custom-range" step="1" id="slider">
 		</form>
 		<button id="all_years_button">Show All Years</button>
@@ -40,102 +46,84 @@
 	<!-- Modal -->
 	<div class="modal fade" id="myModal" role="dialog">
 		<div class="modal-dialog">
-		
-		  <!-- Modal content-->
-		  <div class="modal-content">
-			<div class="modal-header">
-			  <button type="button" class="close" data-dismiss="modal">&times;</button>
-			  <h4 class="modal-title">Filter Data</h4>
-			</div>
-			<div class="modal-body">
-				<div class="form-group has-feedback">
-					<label for="select_race">Race</label>
-					<select class="selectpicker show-tick form-control" data-live-search="true"
-							data-actions-box="true" multiple container="true" 
-							width="auto" actionsBox="true" 
-							id="select_race">
-					</select>
+
+			<!-- Modal content-->
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal">&times;</button>
+					<h4 class="modal-title">Filter Data</h4>
 				</div>
-				<div class="form-group has-feedback">
-					<!-- location_state -->
-					<label for="select_state">State</label> 
-					<select class="selectpicker show-tick form-control" data-live-search="true"
-							data-actions-box="true" multiple container="true" 
-							width="auto" actionsBox="true" 
-							id="select_state">
-					</select>
+				<div class="modal-body">
+					<div class="form-group has-feedback">
+						<label for="select_race">Race</label>
+						<select class="selectpicker show-tick form-control" data-live-search="true" data-actions-box="true" multiple
+							container="true" width="auto" actionsBox="true" id="select_race">
+						</select>
+					</div>
+					<div class="form-group has-feedback">
+						<!-- location_state -->
+						<label for="select_state">State</label>
+						<select class="selectpicker show-tick form-control" data-live-search="true" data-actions-box="true" multiple
+							container="true" width="auto" actionsBox="true" id="select_state">
+						</select>
+					</div>
+					<!-- gender -->
+					<div class="form-group has-feedback">
+						<label for="select_gender">Gender</label>
+						<select class="selectpicker show-tick form-control" data-live-search="true" data-actions-box="true" multiple
+							container="true" width="auto" actionsBox="true" id="select_gender">
+						</select>
+					</div>
+					<!-- weapon_type -->
+					<div class="form-group has-feedback">
+						<label for="select_weapon">Weapon Type</label>
+						<select class="selectpicker show-tick form-control" data-live-search="true" data-actions-box="true" multiple
+							container="true" width="auto" actionsBox="true" id="select_weapon">
+						</select>
+					</div>
+					<!-- prior_signs_mental_health_issues -->
+					<div class="form-group has-feedback">
+						<label for="select_mental">Prior Signs of Mental Health Issues</label>
+						<select class="selectpicker show-tick form-control" data-live-search="true" data-actions-box="true" multiple
+							container="true" width="auto" actionsBox="true" id="select_mental">
+						</select>
+					</div>
+					<!-- age_of_shooter -->
+					<div class="form-group has-feedback">
+						<label for="select_age">Age of Shooter</label>
+						<select class="selectpicker show-tick form-control" data-live-search="true" data-actions-box="true" multiple
+							container="true" width="auto" actionsBox="true" id="select_age">
+						</select>
+					</div>
+					<!-- weapons_obtained_legally -->
+					<div class="form-group has-feedback">
+						<label for="select_legal">Weapons Obtained Legally</label>
+						<select class="selectpicker show-tick form-control" data-live-search="true" data-actions-box="true" multiple
+							container="true" width="auto" actionsBox="true" id="select_legal">
+						</select>
+					</div>
+					<!-- type -->
+					<div class="form-group has-feedback">
+						<label for="select_type">Type of Shooting</label>
+						<select class="selectpicker show-tick form-control" data-live-search="true" data-actions-box="true" multiple
+							container="true" width="auto" actionsBox="true" id="select_type">
+						</select>
+					</div>
+					<!-- location -->
+					<div class="form-group has-feedback">
+						<label for="select_location">Location Type</label>
+						<select class="selectpicker show-tick form-control" data-live-search="true" data-actions-box="true" multiple
+							container="true" width="auto" actionsBox="true" id="select_location">
+						</select>
+					</div>
 				</div>
-				<!-- gender -->
-				<div class="form-group has-feedback">
-					<label for="select_gender">Gender</label>
-					<select class="selectpicker show-tick form-control" data-live-search="true"
-							data-actions-box="true" multiple container="true" 
-							width="auto" actionsBox="true" 
-							id="select_gender">
-					</select>
-				</div>
-				<!-- weapon_type -->
-				<div class="form-group has-feedback">
-					<label for="select_weapon">Weapon Type</label>
-					<select class="selectpicker show-tick form-control" data-live-search="true"
-							data-actions-box="true" multiple container="true" 
-							width="auto" actionsBox="true" 
-							id="select_weapon">
-					</select>
-				</div>
-				<!-- prior_signs_mental_health_issues -->
-				<div class="form-group has-feedback">
-					<label for="select_mental">Prior Signs of Mental Health Issues</label>
-					<select class="selectpicker show-tick form-control" data-live-search="true"
-							data-actions-box="true" multiple container="true" 
-							width="auto" actionsBox="true" 
-							id="select_mental">
-					</select>
-				</div>
-				<!-- age_of_shooter -->
-				<div class="form-group has-feedback">
-					<label for="select_age">Age of Shooter</label>
-					<select class="selectpicker show-tick form-control" data-live-search="true"
-							data-actions-box="true" multiple container="true" 
-							width="auto" actionsBox="true" 
-							id="select_age">
-					</select>
-				</div>
-				<!-- weapons_obtained_legally -->
-				<div class="form-group has-feedback">
-					<label for="select_legal">Weapons Obtained Legally</label>
-					<select class="selectpicker show-tick form-control" data-live-search="true"
-							data-actions-box="true" multiple container="true" 
-							width="auto" actionsBox="true" 
-							id="select_legal">
-					</select>
-				</div>
-				<!-- type -->
-				<div class="form-group has-feedback">
-					<label for="select_type">Type of Shooting</label>
-					<select class="selectpicker show-tick form-control" data-live-search="true"
-							data-actions-box="true" multiple container="true" 
-							width="auto" actionsBox="true" 
-							id="select_type">
-					</select>
-				</div>
-				<!-- location -->
-				<div class="form-group has-feedback">
-					<label for="select_location">Location Type</label>
-					<select class="selectpicker show-tick form-control" data-live-search="true"
-							data-actions-box="true" multiple container="true" 
-							width="auto" actionsBox="true" 
-							id="select_location">
-					</select>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
 				</div>
 			</div>
-			<div class="modal-footer">
-			  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-			</div>
-		  </div>
-		  
+
 		</div>
-	  </div>
+	</div>
 
 
 
