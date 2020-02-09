@@ -105,7 +105,7 @@ function filterData(){
   filteredData = selected_filters.gender.length > 0 ? filteredData.filter((row) => selected_filters.gender.includes(row.gender)) : filteredData;
   filteredData = selected_filters.weapon_type.length > 0 ? filteredData.filter((row) => selected_filters.weapon_type.filter((val) => row.weapon_type.split(";").map(s => s.trim()).includes(val)).length > 0 ) : filteredData;
   filteredData = selected_filters.mental.length > 0 ? filteredData.filter((row) => selected_filters.mental.includes(row.prior_signs_mental_health_issues)) : filteredData;
-  filteredData = selected_filters.age.length > 0 ? filteredData.filter((row) => selected_filters.age.includes(Math.floor(parseInt(row.age_of_shooter)/ 10) * 10)) : filteredData;
+  filteredData = selected_filters.age.length > 0 ? filteredData.filter((row) => selected_filters.age.includes("" + (Math.floor(parseInt(row.age_of_shooter)/ 10) * 10))) : filteredData;
   filteredData = selected_filters.legal.length > 0 ? filteredData.filter((row) => selected_filters.legal.includes(row.weapons_obtained_legally)) : filteredData;
   filteredData = selected_filters.location.length > 0 ? filteredData.filter((row) => selected_filters.location.includes(row.location_type)) : filteredData;
   filteredData = selected_filters.type.length > 0 ? filteredData.filter((row) => selected_filters.type.includes(row.type)) : filteredData;
@@ -335,7 +335,12 @@ async function initFilter(){
   filters.age.forEach(element => {
     let option = document.createElement('option');
     option.setAttribute('value', element);
-    option.innerText = element;
+    if(isNaN(element)){
+      option.innerText = "Unknown";
+    }else{
+      option.innerText = element + "'s";
+    }
+    
     age_filter.appendChild(option);
   });
   age_filter.addEventListener("change", function(){
@@ -388,6 +393,7 @@ async function init() {
   curData = allData;
   await renderMap();
   await initSlider();
+  await initFilter();
 }
 
 init();
