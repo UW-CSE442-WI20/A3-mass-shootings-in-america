@@ -34,7 +34,29 @@ var allData = [];
 var curData = [];
 var year_to_data = {};
 var coord_to_data = {};
+var filters = {
+  race: [],
+  location_state: [],
+  gender: [],
+  weapon_type: [],
+  mental: [],
+  age: [],
+  legal: [],
+  location: [],
+  type: [],
+};
 
+var selected_filters = {
+  race: [],
+  location_state: [],
+  gender: [],
+  weapon_type: [],
+  mental: [],
+  age: [],
+  legal: [],
+  location: [],
+  type: [],
+};
 async function parseData() {
   await d3.csv(data, async function(row) {
     allData.push(row);
@@ -45,11 +67,70 @@ async function parseData() {
     }
     smallest_year = Math.min(smallest_year, parseInt(row.year));
     largest_year = Math.max(largest_year, parseInt(row.year));
+    if (!filters.race.includes(row.race)) {
+      filters.race.push(row.race);
+    } 
+    let state = row.location.split(", ")[1];
+    if (!filters.location_state.includes(state)) {
+      filters.location_state.push(state);
+    } 
+
+    if (!filters.gender.includes(row.gender)) {
+      filters.gender.push(row.gender);
+    } 
+    let weapons = row.weapon_type.split(";");
+    weapons.forEach(weapon => {
+      weapon = weapon.trim();
+      if (!filters.weapon_type.includes(weapon)) {
+        filters.weapon_type.push(weapon);
+      } 
+    });
+    
+    if (!filters.mental.includes(row.prior_signs_mental_health_issues)) {
+      filters.mental.push(row.prior_signs_mental_health_issues);
+    } 
+    let rounded_age = Math.floor(parseInt(row.age_of_shooter)/ 10) * 10;
+    if (!filters.age.includes(rounded_age)) {
+      filters.age.push(rounded_age);
+    } 
+    if (!filters.legal.includes(row.weapons_obtained_legally)) {
+      filters.legal.push(row.weapons_obtained_legally);
+    } 
+    if (!filters.type.includes(row.type)) {
+      filters.type.push(row.type);
+    } 
+    if (!filters.location.includes(row.location_type)) {
+      filters.location.push(row.location_type);
+    } 
   });
+
 }
+
+function filterData(){
+  if(curData === undefined){
+    return [];
+  }
+  let filteredData = curData;
+  
+  filteredData = selected_filters.race.length > 0 ? filteredData.filter((row) => selected_filters.race.includes(row.race)) : filteredData;
+  filteredData = selected_filters.location_state.length > 0 ? filteredData.filter((row) => selected_filters.location_state.includes(row.location.split(", ")[1])) : filteredData;
+  filteredData = selected_filters.gender.length > 0 ? filteredData.filter((row) => selected_filters.gender.includes(row.gender)) : filteredData;
+  filteredData = selected_filters.weapon_type.length > 0 ? filteredData.filter((row) => selected_filters.weapon_type.filter((val) => row.weapon_type.split(";").map(s => s.trim()).includes(val)).length > 0 ) : filteredData;
+  filteredData = selected_filters.mental.length > 0 ? filteredData.filter((row) => selected_filters.mental.includes(row.prior_signs_mental_health_issues)) : filteredData;
+  filteredData = selected_filters.age.length > 0 ? filteredData.filter((row) => selected_filters.age.includes(Math.floor(parseInt(row.age_of_shooter)/ 10) * 10)) : filteredData;
+  filteredData = selected_filters.legal.length > 0 ? filteredData.filter((row) => selected_filters.legal.includes(row.weapons_obtained_legally)) : filteredData;
+  filteredData = selected_filters.location.length > 0 ? filteredData.filter((row) => selected_filters.location.includes(row.location_type)) : filteredData;
+  filteredData = selected_filters.type.length > 0 ? filteredData.filter((row) => selected_filters.type.includes(row.type)) : filteredData;
+
+  return filteredData;
+}
+
 
 async function renderMap() {
   // Initialize svg object
+  document.getElementById("map").innerHTML = "";
+  let filteredData = filterData();
+  console.log(filteredData)
   map = d3
     .select("#map")
     .append("svg")
@@ -83,8 +164,8 @@ async function renderMap() {
     .attr("class", "map")
     .attr("d", path(topojson.feature(topology, topology.objects.states)));
 
-  for (let i = 0; i < curData.length; i++) {
-    let row = curData[i];
+  for (let i = 0; i < filteredData.length; i++) {
+    let row = filteredData[i];
     let coord = [row.longitude, row.latitude];
     let x = projection(coord)[0],
       y = projection(coord)[1];
@@ -207,41 +288,117 @@ async function initSlider() {
   });
 }
 
-async function initFilter() {
-  d3.select("filter").attr("opacity", 0.2);
-  d3.select("filter")
-    .text("Filters")
-    .attr("class", "desc");
-  legend = d3.select("filter").append("div");
-  let menu = d3
-    .select("filter")
-    .append("div")
-    .attr("class", "menu");
-
-  Object.keys(filters).forEach(function(key) {
-    menu
-      .append("img")
-      .attr("src", filters[key].img)
-      .attr("id", key)
-      .on("click", updateFilter);
+async function initFilter(){
+  var race_filter = document.getElementById("select_race");
+  filters.race.forEach(element => {
+    let option = document.createElement('option');
+    option.setAttribute('value', element);
+    option.innerText = element;
+    race_filter.appendChild(option);
+  });
+  race_filter.addEventListener("change", function(){
+    selected_filters.race = $(this).val();
+    renderMap();
   });
 
-  menu
-    .append("svg")
-    .attr("id", "selector")
-    .attr("class", "selector")
-    .style("grid-column", 4);
-}
+  var location_state_filter = document.getElementById("select_state");
+  filters.location_state.forEach(element => {
+    let option = document.createElement('option');
+    option.setAttribute('value', element);
+    option.innerText = element;
+    location_state_filter.appendChild(option);
+  });
+  location_state_filter.addEventListener("change", function(){
+    selected_filters.location_state = $(this).val();
+    renderMap();
+  });
 
-function updateFilter() {
-  console.log("here");
-  currentFilter = d3.select(this);
+  var gender_filter = document.getElementById("select_gender");
+  filters.gender.forEach(element => {
+    let option = document.createElement('option');
+    option.setAttribute('value', element);
+    option.innerText = element;
+    gender_filter.appendChild(option);
+  });
+  gender_filter.addEventListener("change", function(){
+    selected_filters.gender = $(this).val();
+    renderMap();
+  });
 
-  var move = filters[currentFilter.node()["id"]].col;
-  d3.select("selector")
-    .transition()
-    .duration(400)
-    .style("grid-column", move);
+  var weapon_type_filter = document.getElementById("select_weapon");
+  filters.weapon_type.forEach(element => {
+    let option = document.createElement('option');
+    option.setAttribute('value', element);
+    option.innerText = element;
+    weapon_type_filter.appendChild(option);
+  });
+  weapon_type_filter.addEventListener("change", function(){
+    selected_filters.weapon_type = $(this).val();
+    renderMap();
+  });
+
+  var mental_filter = document.getElementById("select_mental");
+  filters.mental.forEach(element => {
+    let option = document.createElement('option');
+    option.setAttribute('value', element);
+    option.innerText = element;
+    mental_filter.appendChild(option);
+  });
+  mental_filter.addEventListener("change", function(){
+    selected_filters.mental = $(this).val();
+    renderMap();
+  });
+
+  var age_filter = document.getElementById("select_age");
+  filters.age.forEach(element => {
+    let option = document.createElement('option');
+    option.setAttribute('value', element);
+    option.innerText = element;
+    age_filter.appendChild(option);
+  });
+  age_filter.addEventListener("change", function(){
+    selected_filters.age = $(this).val();
+    renderMap();
+  });
+
+  var legal_filter = document.getElementById("select_legal");
+  filters.legal.forEach(element => {
+    let option = document.createElement('option');
+    option.setAttribute('value', element);
+    option.innerText = element;
+    legal_filter.appendChild(option);
+  });
+  legal_filter.addEventListener("change", function(){
+    selected_filters.legal = $(this).val();
+    renderMap();
+  });
+
+  var location_filter = document.getElementById("select_location");
+  filters.location.forEach(element => {
+    let option = document.createElement('option');
+    option.setAttribute('value', element);
+    option.innerText = element;
+    location_filter.appendChild(option);
+  });
+  location_filter.addEventListener("change", function(){
+    selected_filters.location = $(this).val();
+    renderMap();
+  });
+
+  var type_filter = document.getElementById("select_type");
+  filters.type.forEach(element => {
+    let option = document.createElement('option');
+    option.setAttribute('value', element);
+    option.innerText = element;
+    type_filter.appendChild(option);
+  });
+  type_filter.addEventListener("change", function(){
+    selected_filters.type = $(this).val();
+    renderMap();
+  });
+
+  $('.selectpicker').selectpicker('refresh');
+
 }
 
 async function init() {
