@@ -501,6 +501,7 @@ async function init() {
   await renderMap();
   await initHistogram();
   await initSlider();
+  await initFilter();
 }
 
 init();
