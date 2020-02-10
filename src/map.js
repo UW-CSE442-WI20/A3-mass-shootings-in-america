@@ -435,16 +435,19 @@ async function initFilter() {
 }
 
 async function initHistogram() {
+  // get current width of the slider div
+  var currentWidth = parseInt(d3.select('#slider').style('width'), 10);
+
   var h = 75,
-    w = 750,
-    xscale = 750 / 40,
+    w = currentWidth,
+    xscale = w / 40,
     yscale = 6;
   var graph = d3
     .select("#histogram")
     .append("svg")
     .attr("height", h)
     .attr("width", w)
-    .attr("id", "histogram");
+    .attr("id", "svg-histogram");
 
   let dx = 0;
   for (let i = 1982; i < 2020; i++) {
@@ -462,6 +465,8 @@ async function initHistogram() {
       .style("stroke", "black");
     dx += xscale + 1;
   }
+
+  window.addEventListener('resize', resizeHisto);
 
   highlightYear("all");
 }
@@ -502,6 +507,27 @@ async function init() {
   await initHistogram();
   await initSlider();
   await initFilter();
+}
+
+// resize function for histogram
+function resizeHisto() {
+  var currentWidth = parseInt(d3.select('#slider').style('width'), 10);
+  var w = currentWidth,
+    xscale = w / 40;
+  var graph = d3
+      .select("#histogram")
+      .attr("width", w);
+
+  var svg = d3
+      .select("#svg-histogram")
+      .attr("width", w);
+
+  var histo = d3
+    .select('#svg-histogram')
+    .selectAll('rect')
+    .attr("width", xscale)
+
+  histo.selectAll('rect').each(function(d, i){d3.select(this).attr("x", xscale*(i))});
 }
 
 init();
