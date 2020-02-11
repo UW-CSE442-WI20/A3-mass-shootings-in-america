@@ -6,7 +6,6 @@ var width = 975,
   height = 610,
   focus = d3.select(null);
 
-var currentFilter;
 var projection = d3
     .geoAlbersUsa()
     .scale(1300)
@@ -20,7 +19,6 @@ var largest_year = 0;
 var allData = [];
 var curData = [];
 var year_to_data = {};
-var coord_to_data = {};
 var filters = {
   race: [],
   location_state: [],
@@ -61,8 +59,8 @@ async function parseData() {
     }
     smallest_year = Math.min(smallest_year, parseInt(row.year));
     largest_year = Math.max(largest_year, parseInt(row.year));
-    if (!filters.race.includes(row.race)) {
-      filters.race.push(row.race);
+    if (!filters.race.includes(row.race.trim())) {
+      filters.race.push(row.race.trim());
     }
     let state = row.location.split(", ")[1];
     if (!filters.location_state.includes(state)) {
@@ -84,6 +82,11 @@ async function parseData() {
       filters.mental.push(row.prior_signs_mental_health_issues);
     }
     let rounded_age = Math.floor(parseInt(row.age_of_shooter) / 10) * 10;
+
+    rounded_age =
+      row.age_of_shooter == "Unclear"
+        ? "Unknown"
+        : rounded_age + "-" + Number(rounded_age + 9);
     if (!filters.age.includes(rounded_age)) {
       filters.age.push(rounded_age);
     }
@@ -97,6 +100,7 @@ async function parseData() {
       filters.location.push(row.location_type);
     }
   });
+  Object.values(filters).forEach(v => (v = v.sort()));
 }
 
 function filterData() {
@@ -168,7 +172,7 @@ function filterData() {
 async function renderMap() {
   // Initialize svg object
   document.getElementById("map").innerHTML = "";
-  let filteredData = filterData();
+  let data = filterData();
   map = d3
     .select("#map")
     .append("svg")
@@ -207,8 +211,9 @@ async function renderMap() {
     .attr("class", "map")
     .attr("d", path(topojson.feature(topology, topology.objects.states)));
 
-  for (let i = 0; i < filteredData.length; i++) {
-    let row = filteredData[i];
+  for (let j = 0; j < data.length; j++) {
+    let row = data[j];
+    console.log(row);
     let coord = [row.longitude, row.latitude];
     let x = projection(coord)[0],
       y = projection(coord)[1];
@@ -240,20 +245,9 @@ async function renderMap() {
           .duration(500)
           .style("opacity", 0);
       })
-      .on("click", handleClick);
-    coord_to_data[(Math.round(x), Math.round(y))] = row;
-  }
-}
-
-function handleClick() {
-  if (this == focus.node() || this["id"] === "map") {
-    focus = d3.select(null);
-    closePanel();
-  } else if (this["id"] === "point") {
-    focus = d3.select(this);
-    let x = Math.round(focus._groups[0][0]["cx"].baseVal.value),
-      y = Math.round(focus._groups[0][0]["cy"].baseVal.value);
-    openPanel(coord_to_data[(x, y)]);
+      .on("click", function() {
+        openPanel(row);
+      });
   }
 }
 
@@ -262,12 +256,15 @@ function zoomed() {
 }
 
 function closePanel() {
-  info
+  d3.select("#info_panel")
     .html("")
     .transition()
     .duration(1000)
     .style("opacity", 0)
     .style("height", "0 px");
+  d3.select("#panel_title").html("");
+  d3.select("#info_title").html("");
+  d3.select("#panel_nav").html("");
 }
 
 function victimCount(count, col) {
@@ -281,40 +278,91 @@ function victimCount(count, col) {
   return ret;
 }
 
-function openPanel(pointData) {
+function mainScreen(pointData) {
   let fat = pointData.fatalities,
     inj = pointData.injured;
-  info.html(
-    "<h3>" +
-      pointData.case +
-      "</h3>" +
-      "<hr width=95%><h4>Location: " +
-      pointData.location +
-      "<br>Date: " +
-      pointData.date +
-      "</h4>" +
-      "<h5>" +
-      pointData.summary +
-      "</h5><br><div class =stat>" +
-      "<div class=cat>Fatalties<br><h6>" +
-      fat +
-      "</h6></div>" +
-      "<div class=count>" +
-      victimCount(fat, "darkred") +
-      "</div></div><br><div class=stat>" +
-      "<div class=cat>Injured<br><h6>" +
-      inj +
-      "</h6></div>" +
-      "<div class=count>" +
-      victimCount(inj, "black") +
-      "</div></div><br><br>"
+  return (
+    "Location:" +
+    pointData.location +
+    "<br>Date: " +
+    pointData.date +
+    "</h4>" +
+    "<h5>" +
+    pointData.summary +
+    "</h5><br><div class =stat>" +
+    "<div class=cat>Fatalties<br><h6>" +
+    fat +
+    "</h6></div>" +
+    "<div class=count>" +
+    victimCount(fat, "darkred") +
+    "</div></div><br><div class=stat>" +
+    "<div class=cat>Injured<br><h6>" +
+    inj +
+    "</h6></div>" +
+    "<div class=count>" +
+    victimCount(inj, "black") +
+    "</div></div><br><br>"
   );
+}
+
+function altScreen(data) {
+  return (
+    "<h5>Weapons used: <b>" +
+    data.weapon_type +
+    "<br></b>Obtained legally: <b>" +
+    data.weapons_obtained_legally +
+    "</b><br><br><p>Suspect:<b> " +
+    data.summary.split(",")[0] +
+    "</b></p><ul>" +
+    "<li>Age:" +
+    data.age_of_shooter +
+    "<li>Race: " +
+    data.race +
+    "<li>Mental health issues: " +
+    data.prior_signs_mental_health_issues +
+    "</ul></h5>"
+  );
+}
+
+function changeScreen(data, flag) {
+  let content = flag ? altScreen(data) : mainScreen(data);
+  let label = flag ? "Back" : "More Info";
+
+  d3.select("#panel_main").html(content);
+  d3.select("#panel_nav").text(label);
+}
+
+function openPanel(pointData) {
+  closePanel();
+  console.log(pointData);
+  var current = true;
 
   info
     .append("div")
+    .attr("class", "title")
+    .attr("id", "panel_title")
+    .html("<p>" + pointData.case + "<hr width=95%>");
+
+  info
+    .append("div")
+    .attr("class", "info")
+    .attr("id", "panel_main")
+    .html(mainScreen(pointData));
+
+  let nav = info.append("div").attr("class", "nav");
+  nav
     .append("button")
-    .attr("class", "info-button")
-    .text("close")
+    .attr("class", "btn")
+    .attr("id", "panel_nav")
+    .text("More Info")
+    .on("click", function() {
+      changeScreen(pointData, current);
+      current = !current;
+    });
+  nav
+    .append("button")
+    .text("Close")
+    .attr("class", "btn")
     .on("click", closePanel);
 
   /*"<iframe sandbox=allow-scripts width=" +
@@ -329,7 +377,7 @@ function openPanel(pointData) {
   info
     .style("opacity", 0)
     .transition()
-    .duration(300)
+    .duration(500)
     .style("opacity", 1);
 }
 

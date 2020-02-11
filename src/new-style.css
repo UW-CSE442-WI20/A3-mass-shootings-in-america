@@ -109,18 +109,59 @@ body {
 }
 
 #info_panel {
-  border-radius: 30px;
-  border-color: white;
-  border-style: groove;
-  border-width: 10;
   display: flex;
+  border-radius: 30px;
   flex-direction: column;
   background-color: lightslategray;
-  margin-top: 1cm;
-  margin-bottom: 1cm;
+  border-color: white;
+  border-radius: 30px;
+  border-style: groove;
+  border-width: 10;
+  overflow: visible;
+}
+
+#info_panel .title {
+  text-transform: capitalize;
+  font-weight: bold;
+  font-size: 14pt;
+  margin-top: 10px;
+  margin-left: 1em;
+  margin-right: 1em;
+}
+
+#info_panel .info {
+  font-family: "Courier New", Courier, monospace;
+  text-align: left;
+  font-size: 10pt;
+  margin-bottom: 1em;
   line-height: normal;
   justify-content: center;
   align-items: center;
+  max-height: 450px;
+  overflow: scroll;
+  margin-left: 10px;
+}
+
+#info_panel .nav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#info_panel .nav .btn {
+  font-size: 10pt;
+  background-color: #2d2d2d;
+  color: white;
+  height: min-content;
+  font-weight: bold;
+  width: min-content;
+  font-stretch: narrower;
+  margin: 1px;
+  font-stretch: expanded;
+}
+
+#info_panel .nav .btn:hover {
+  background-color: gray;
 }
 
 .stat {
@@ -130,7 +171,7 @@ body {
   flex-direction: row;
   justify-content: center;
   align-content: center;
-  padding: 5px;
+  padding-top: 5px;
 }
 
 .stat .cat {
@@ -148,17 +189,52 @@ body {
   text-align: left;
   position: relative;
   vertical-align: center;
+  overflow: scroll;
 }
 
 div.tooltip {
   position: absolute;
   text-align: center;
   width: 60px;
-  height: 28px;
   padding: 2px;
   font: 12px sans-serif;
   background: lightsteelblue;
   border: 0px;
   border-radius: 8px;
   pointer-events: none;
+}
+
+#legend {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+  height: fit-content;
+  max-height: 100px;
+  color: white;
+  padding-top: 20px;
+  justify-content: space-evenly;
+  overflow-y: scroll;
+}
+
+div.legend-entry {
+  display: flex;
+  flex-direction: row;
+  padding: 0px 5px 0px 5px;
+  font-size: 10pt;
+  height: 20px;
+  text-transform: capitalize;
+  align-items: center;
+  text-align: center;
+}
+
+svg.legend {
+  height: 100%;
+  width: 20px;
+}
+
+span.legend {
+  height: 100%;
+  vertical-align: middle;
 }
