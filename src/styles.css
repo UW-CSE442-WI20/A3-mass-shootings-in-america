@@ -75,8 +75,8 @@ div.menu {
 
 div.tooltip {
   background-color: lightgray;
-  border: 12px;
   font-size: 10pt;
+  width: max-content;
   padding-left: 5px;
   pointer-events: none;
   position: absolute;

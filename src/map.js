@@ -1,7 +1,7 @@
 import "regenerator-runtime/runtime";
 
 var topology = require("./us-states.json");
-var map, tooltip, info, focus, zoom, view, prevYear;
+var map, tooltip, hist_tooltip, info, focus, zoom, view, prevYear;
 var width = 975,
   height = 610,
   focus = d3.select(null);
@@ -436,11 +436,11 @@ async function initFilter() {
 
 async function initHistogram() {
   // get current width of the slider div
-  var currentWidth = parseInt(d3.select('#slider').style('width'), 10);
+  var currentWidth = parseInt(d3.select("#slider").style("width"), 10);
 
   var h = 75,
     w = currentWidth,
-    xscale = w / 40,
+    xscale = w / 39.25,
     yscale = 6;
   var graph = d3
     .select("#histogram")
@@ -448,13 +448,16 @@ async function initHistogram() {
     .attr("height", h)
     .attr("width", w)
     .attr("id", "svg-histogram");
+  hist_tooltip = d3
+    .select("#histogram")
+    .append("div")
+    .attr("class", "tooltip");
 
   let dx = 0;
   for (let i = 1982; i < 2020; i++) {
     let value = year_to_data[i] === undefined ? 0 : year_to_data[i].length;
     let dy = h - value * yscale;
-    // 0*20+20  1*18, 2*18     2
-    // 0-20, 25-35, 40-50
+
     graph
       .append("rect")
       .attr("height", value * yscale)
@@ -462,16 +465,34 @@ async function initHistogram() {
       .attr("x", dx)
       .attr("y", dy)
       .attr("id", "y_" + i)
-      .style("stroke", "black");
+      .style("stroke", "black")
+      .on("mouseover", function() {
+        let x = d3.select(this).attr("x"),
+          y = d3.select(this).attr("y") - 20;
+
+        hist_tooltip
+          .html("<b>" + i + ":</b> " + year_to_data[i].length + " shootings ")
+          .style("left", x + "px")
+          .style("top", y + "px")
+          .style("opacity", 1);
+      })
+      .on("mouseout", function() {
+        hist_tooltip.html("").style("opacity", 0);
+      })
+      .on("click", function() {
+        var event = new Event("change");
+        document.getElementById("slider").value = i;
+        document.getElementById("slider").dispatchEvent(event);
+      });
     dx += xscale + 1;
   }
 
-  window.addEventListener('resize', resizeHisto);
-
+  window.addEventListener("resize", resizeHisto);
   highlightYear("all");
 }
 
 function highlightYear(year) {
+  console.log(year);
   let highlight = { color: "steelblue", opacity: 1 };
   let def = { color: "lightgray", opacity: 0.4 };
 
@@ -511,23 +532,21 @@ async function init() {
 
 // resize function for histogram
 function resizeHisto() {
-  var currentWidth = parseInt(d3.select('#slider').style('width'), 10);
+  var currentWidth = parseInt(d3.select("#slider").style("width"), 10);
   var w = currentWidth,
     xscale = w / 40;
-  var graph = d3
-      .select("#histogram")
-      .attr("width", w);
+  var graph = d3.select("#histogram").attr("width", w);
 
-  var svg = d3
-      .select("#svg-histogram")
-      .attr("width", w);
+  var svg = d3.select("#svg-histogram").attr("width", w);
 
   var histo = d3
-    .select('#svg-histogram')
-    .selectAll('rect')
-    .attr("width", xscale)
+    .select("#svg-histogram")
+    .selectAll("rect")
+    .attr("width", xscale);
 
-  histo.selectAll('rect').each(function(d, i){d3.select(this).attr("x", xscale*(i))});
+  histo.selectAll("rect").each(function(d, i) {
+    d3.select(this).attr("x", xscale * i);
+  });
 }
 
 init();
