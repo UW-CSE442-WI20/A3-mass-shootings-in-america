@@ -45,9 +45,11 @@ var selected_filters = {
   type: []
 };
 
-var div = d3.select("body").append("div")	
-    .attr("class", "tooltip")				
-    .style("opacity", 0);
+var div = d3
+  .select("body")
+  .append("div")
+  .attr("class", "tooltip")
+  .style("opacity", 0);
 
 async function parseData() {
   await d3.csv(data, async function(row) {
@@ -139,7 +141,7 @@ function filterData() {
     selected_filters.age.length > 0
       ? filteredData.filter(row =>
           selected_filters.age.includes(
-           "" +  (Math.floor(parseInt(row.age_of_shooter)/ 10) * 10)
+            "" + Math.floor(parseInt(row.age_of_shooter) / 10) * 10
           )
         )
       : filteredData;
@@ -179,13 +181,7 @@ async function renderMap() {
     .select("#map")
     .append("div")
     .attr("class", "tooltip");
-
-  info = d3
-    .select("#map")
-    .append("div")
-    .attr("class", "info")
-    .attr("height", "0px");
-
+  info = d3.select("#info_panel").style("opacity", 0);
   zoom = d3
     .zoom()
     .scaleExtent([1, 8])
@@ -228,18 +224,21 @@ async function renderMap() {
       .attr("id", "point")
       .on("mouseover", function() {
         d3.select(this).attr("opacity", 0.6);
-        div.transition()		
-            .duration(200)		
-            .style("opacity", .9);		
-        div.html((row.case) + "<br/>"  + row.fatalities+ " casualties")	
-            .style("left", (d3.event.pageX) + "px")
-            .style("top", (d3.event.pageY - 28) + "px");
-        })
+        div
+          .transition()
+          .duration(200)
+          .style("opacity", 0.9);
+        div
+          .html(row.case + "<br/>" + row.fatalities + " casualties")
+          .style("left", d3.event.pageX + "px")
+          .style("top", d3.event.pageY - 28 + "px");
+      })
       .on("mouseout", function() {
         d3.select(this).attr("opacity", 1);
-        div.transition()		
-                .duration(500)		
-                .style("opacity", 0);	
+        div
+          .transition()
+          .duration(500)
+          .style("opacity", 0);
       })
       .on("click", handleClick);
     coord_to_data[(Math.round(x), Math.round(y))] = row;
@@ -271,32 +270,67 @@ function closePanel() {
     .style("height", "0 px");
 }
 
+function victimCount(count, col) {
+  let ret = "";
+  for (let i = 0; i < count; i++) {
+    ret +=
+      "<i class=material-icons style=font-size:14px;color:" +
+      col +
+      ";>person</i>";
+  }
+  return ret;
+}
+
 function openPanel(pointData) {
-  var externalLink = pointData.sources.split(";")[0];
-  var embedd =
-    "<iframe sandbox=allow-scripts width=" +
+  let fat = pointData.fatalities,
+    inj = pointData.injured;
+  info.html(
+    "<h3>" +
+      pointData.case +
+      "</h3>" +
+      "<hr width=95%><h4>Location: " +
+      pointData.location +
+      "<br>Date: " +
+      pointData.date +
+      "</h4>" +
+      "<h5>" +
+      pointData.summary +
+      "</h5><br><div class =stat>" +
+      "<div class=cat>Fatalties<br><h6>" +
+      fat +
+      "</h6></div>" +
+      "<div class=count>" +
+      victimCount(fat, "darkred") +
+      "</div></div><br><div class=stat>" +
+      "<div class=cat>Injured<br><h6>" +
+      inj +
+      "</h6></div>" +
+      "<div class=count>" +
+      victimCount(inj, "black") +
+      "</div></div><br><br>"
+  );
+
+  info
+    .append("div")
+    .append("button")
+    .attr("class", "info-button")
+    .text("close")
+    .on("click", closePanel);
+
+  /*"<iframe sandbox=allow-scripts width=" +
     100 +
     "% height= " +
     height / 2 +
     " src=" +
     externalLink +
     "</iframe>";
+    */
 
   info
-    .html(embedd)
+    .style("opacity", 0)
     .transition()
-    .duration(1000)
-    .style("opacity", 1)
-    .style("height", height / 2 + "px");
-
-  info
-    .append("div")
-    .attr("class", "info-button")
-    .text(pointData.case)
-    .append("button")
-    .style("border", "none")
-    .text("X")
-    .on("click", closePanel);
+    .duration(300)
+    .style("opacity", 1);
 }
 
 async function initSlider() {
@@ -395,9 +429,9 @@ async function initFilter() {
   filters.age.forEach(element => {
     let option = document.createElement("option");
     option.setAttribute("value", element);
-    if(isNaN(element)){
+    if (isNaN(element)) {
       option.innerText = "Unknown";
-    }else{
+    } else {
       option.innerText = element + "'s";
     }
     age_filter.appendChild(option);
@@ -452,7 +486,7 @@ async function initHistogram() {
 
   var h = 75,
     w = currentWidth,
-    xscale = w / 39.25,
+    xscale = w / 39,
     yscale = 6;
   var graph = d3
     .select("#histogram")

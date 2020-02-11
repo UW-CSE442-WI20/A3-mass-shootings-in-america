@@ -40,6 +40,41 @@ h2 {
   margin: 5px;
 }
 
+h3 {
+  text-transform: capitalize;
+  font-weight: bold;
+  margin-left: 1em;
+  margin-right: 1em;
+}
+
+h4 {
+  font-family: "Courier New", Courier, monospace;
+  text-transform: capitalize;
+  text-align: left;
+  font-size: 10pt;
+  margin-top: 1em;
+  margin-bottom: 0em;
+}
+
+h5 {
+  font-family: "Courier New", Courier, monospace;
+  text-align: left;
+  padding-left: 5px;
+  font-size: 10pt;
+}
+
+h6 {
+  font-weight: bold;
+  margin-top: 0em;
+  font-size: 16pt;
+  text-align: right;
+}
+
+hr {
+  margin: 0.5em;
+  border-width: 0.5px;
+}
+
 filter {
   display: grid;
   grid-template-columns: 20% 50% 30%;
@@ -77,38 +112,24 @@ div.tooltip {
   background-color: lightgray;
   font-size: 10pt;
   width: max-content;
-  padding-left: 5px;
+  padding: 5px;
   pointer-events: none;
   position: absolute;
   text-align: left;
   text-transform: capitalize;
 }
 
-div.info {
-  position: absolute;
-  display: flex;
-  flex-direction: column-reverse;
-  border: 12px black;
-  background-color: lightslategray;
-  right: 0px;
-  top: 80px;
-  width: 300px;
-  margin-top: 0.5em;
-  margin-bottom: 0.5em;
-}
-
-.info-button {
+button.info-button {
   text-transform: capitalize;
-  font-size: 12pt;
+  font-size: 9pt;
+  background-color: #2d2d2d;
+  color: white;
   font-weight: bold;
+  width: min-content;
   font-stretch: narrower;
   font-stretch: expanded;
-  display: flex;
-  justify-content: space-between;
-  border: 0px;
-  fill: none;
+  justify-self: center;
   border-radius: 1cm;
-  background-color: none;
 }
 
 .custom-range {

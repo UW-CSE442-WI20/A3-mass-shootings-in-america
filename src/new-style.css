@@ -4,7 +4,7 @@ header {
 }
 
 body {
-  background-color: #1A1F2A !important;
+  background-color: #1a1f2a !important;
   margin-left: 2.5vw;
   width: 95vw;
   margin-bottom: 70px;
@@ -44,16 +44,16 @@ body {
   margin-left: -1px;
   -webkit-appearance: none;
   border-radius: 50%;
-  background: #41454A;
+  background: #41454a;
   border-style: solid;
   border-width: 2px;
-  border-color: #696A6F;
+  border-color: #696a6f;
 }
 
-#slider_container input:focus::-webkit-slider-thumb{
+#slider_container input:focus::-webkit-slider-thumb {
   outline: none;
   color: white;
-  background-color: #E33C14;
+  background-color: #e33c14;
   border-color: darkred;
 }
 
@@ -89,12 +89,12 @@ body {
 #all_years_button:focus {
   outline: none;
   color: white;
-  background-color: #E33C14;
+  background-color: #e33c14;
 }
 
 #slider_year:focus {
   outline: none;
-  color: #696A6F !important;
+  color: #696a6f !important;
 }
 
 #slider_year {
@@ -106,20 +106,59 @@ body {
 }
 
 #histogram {
-
 }
 
+#info_panel {
+  border-radius: 30px;
+  border-color: white;
+  border-style: groove;
+  border-width: 10;
+  display: flex;
+  flex-direction: column;
+  background-color: lightslategray;
+  margin-top: 1cm;
+  margin-bottom: 1cm;
+  line-height: normal;
+  justify-content: center;
+  align-items: center;
+}
 
+.stat {
+  margin-bottom: -10px;
+  display: flex;
+  width: 100%;
+  flex-direction: row;
+  justify-content: center;
+  align-content: center;
+  padding: 5px;
+}
 
-div.tooltip {	
-  position: absolute;			
-  text-align: center;			
-  width: 60px;					
-  height: 28px;					
-  padding: 2px;				
-  font: 12px sans-serif;		
-  background: lightsteelblue;	
-  border: 0px;		
-  border-radius: 8px;			
-  pointer-events: none;			
+.stat .cat {
+  position: relative;
+  justify-content: center;
+  align-items: center;
+  text-align: right;
+  width: 25%;
+  margin-right: 5%;
+  font-weight: bold;
+}
+
+.stat .count {
+  width: 70%;
+  text-align: left;
+  position: relative;
+  vertical-align: center;
+}
+
+div.tooltip {
+  position: absolute;
+  text-align: center;
+  width: 60px;
+  height: 28px;
+  padding: 2px;
+  font: 12px sans-serif;
+  background: lightsteelblue;
+  border: 0px;
+  border-radius: 8px;
+  pointer-events: none;
 }
