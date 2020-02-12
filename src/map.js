@@ -563,6 +563,24 @@ async function initFilter() {
     initHistogram();
   });
 
+  document.getElementById("filter_reset").addEventListener("click",function() {
+    $(".selectpicker").val('default');
+    $(".selectpicker").selectpicker("refresh");
+    selected_filters = {
+      race: [],
+      location_state: [],
+      gender: [],
+      weapon_type: [],
+      mental: [],
+      age: [],
+      legal: [],
+      location: [],
+      type: []
+    };
+    renderMap();
+    initHistogram();
+  });
+
   $(".selectpicker").selectpicker("refresh");
 }
 
