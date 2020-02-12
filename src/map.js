@@ -145,7 +145,7 @@ function filterData() {
     selected_filters.age.length > 0
       ? filteredData.filter(row =>
           selected_filters.age.includes(
-            "" + Math.floor(parseInt(row.age_of_shooter) / 10) * 10
+            "" + row.age_of_shooter.substring(0,1)
           )
         )
       : filteredData;
@@ -515,12 +515,8 @@ async function initFilter() {
   var age_filter = document.getElementById("select_age");
   filters.age.forEach(element => {
     let option = document.createElement("option");
-    option.setAttribute("value", element);
-    if (isNaN(element)) {
-      option.innerText = "Unknown";
-    } else {
-      option.innerText = element + "'s";
-    }
+    option.setAttribute("value", element.substring(0, 1));
+    option.innerText = "" + element;
     age_filter.appendChild(option);
   });
   age_filter.addEventListener("change", function() {
