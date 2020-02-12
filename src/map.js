@@ -219,12 +219,15 @@ async function renderMap() {
             // maually fixing display
             if(d.properties.name == "Michigan") {
               return path.centroid(d)[0] + 20;
+            } else if (d.properties.name == "Hawaii") {
             }
               return path.centroid(d)[0];
           })
           .attr("y", function(d) {
             if(d.properties.name == "Michigan") {
               return path.centroid(d)[1] + 25;
+            } else if (d.properties.name == "Hawaii") {
+              
             }
               return path.centroid(d)[1];
           })
@@ -237,9 +240,6 @@ async function renderMap() {
                && d.properties.name != "Connecticut" && d.properties.name != "District of Columbia"
               && d.properties.name != "New Jersey" && d.properties.name != "Massachusetts"
              && d.properties.name != "Delaware"  && d.properties.name != "Florida") {
-               if (d.properties.name == "Hawaii") {
-                 console.log("HEREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
-               }
               return d.properties.name;
             }
           });
