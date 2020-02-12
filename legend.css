@@ -1,0 +1,30 @@
+div.legend {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: left;
+  width: 100%;
+  height: fit-content;
+  background-color: gray;
+}
+
+div.legend-entry {
+  display: flex;
+  flex-direction: row;
+  padding: 0px 5px 0px 5px;
+  font-size: 10pt;
+  height: 20px;
+  text-transform: capitalize;
+  align-items: center;
+  text-align: center;
+}
+
+svg.legend {
+  height: 100%;
+  width: 20px;
+}
+
+span.legend {
+  height: 100%;
+  vertical-align: middle;
+}
