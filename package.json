@@ -23,6 +23,7 @@
     "bootstrap-slider": "^10.6.2",
     "material-design-icons": "^3.0.1",
     "public": "^0.1.5",
+    "regenerator-runtime": "^0.13.3",
     "us-atlas": "^3.0.0"
   }
 }

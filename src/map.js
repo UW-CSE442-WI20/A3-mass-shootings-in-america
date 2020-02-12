@@ -1,5 +1,4 @@
-import "regenerator-runtime/runtime";
-
+const regeneratorRuntime = require("regenerator-runtime");
 var topology = require("./us-states.json");
 var map, tooltip, hist_tooltip, info, focus, zoom, view, prevYear;
 var width = 975,
