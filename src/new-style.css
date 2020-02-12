@@ -25,6 +25,7 @@ body {
   margin-right: 1%;
 }
 
+
 .side-by-side .col-2 {
   width: 15%;
   position: relative;
@@ -50,7 +51,7 @@ body {
   border-color: #696a6f;
 }
 
-#slider_container input:focus::-webkit-slider-thumb {
+#slider_container input:focus::-webkit-slider-thumb, #slider_container input:hover::-webkit-slider-thumb {
   outline: none;
   color: white;
   background-color: #e33c14;
@@ -86,10 +87,11 @@ body {
   margin-bottom: 5px;
 }
 
-#all_years_button:focus {
+#all_years_button:focus, #all_years_button:hover {
   outline: none;
   color: white;
   background-color: #e33c14;
+  transition: 0.2s;
 }
 
 #slider_year:focus {
@@ -106,6 +108,11 @@ body {
 }
 
 #histogram {
+}
+
+#infographics {
+  margin-left: 10px;
+  margin-right: 10px;
 }
 
 #info_panel {
@@ -138,8 +145,9 @@ body {
   justify-content: center;
   align-items: center;
   max-height: 450px;
-  overflow: scroll;
-  margin-left: 10px;
+  overflow-y: scroll;
+  margin-left: 5px;
+  margin-right: 5px;
 }
 
 #info_panel .nav {
@@ -189,7 +197,7 @@ body {
   text-align: left;
   position: relative;
   vertical-align: center;
-  overflow: scroll;
+  /*overflow: scroll;*/
 }
 
 div.tooltip {
@@ -215,7 +223,7 @@ div.tooltip {
   color: white;
   padding-top: 20px;
   justify-content: space-evenly;
-  overflow-y: scroll;
+  /*overflow-y: scroll;*/
 }
 
 div.legend-entry {

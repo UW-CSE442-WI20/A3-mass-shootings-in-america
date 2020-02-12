@@ -211,6 +211,39 @@ async function renderMap() {
     .attr("class", "map")
     .attr("d", path(topojson.feature(topology, topology.objects.states)));
 
+      // Adding states names to display at the center
+      map.selectAll("path")
+          .data(topojson.feature(topology, topology.objects.states).features)
+          .enter().append("text")
+          .attr("x", function(d) {
+            // maually fixing display
+            if(d.properties.name == "Michigan") {
+              return path.centroid(d)[0] + 20;
+            }
+              return path.centroid(d)[0];
+          })
+          .attr("y", function(d) {
+            if(d.properties.name == "Michigan") {
+              return path.centroid(d)[1] + 25;
+            }
+              return path.centroid(d)[1];
+          })
+          .attr("text-anchor", "middle")
+          .attr("font-size", "10px")
+          .attr("font-family", "Arial, Helvetica, sans-serif")
+          .text(function(d){
+            // Manually erasing states names that are hard to display
+            if (d.properties.name != "New Hampshire" && d.properties.name != "Rhode Island"
+               && d.properties.name != "Connecticut" && d.properties.name != "District of Columbia"
+              && d.properties.name != "New Jersey" && d.properties.name != "Massachusetts"
+             && d.properties.name != "Delaware"  && d.properties.name != "Florida") {
+               if (d.properties.name == "Hawaii") {
+                 console.log("HEREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
+               }
+              return d.properties.name;
+            }
+          });
+
   for (let j = 0; j < data.length; j++) {
     let row = data[j];
     console.log(row);
@@ -225,7 +258,9 @@ async function renderMap() {
       .attr("cy", y)
       .attr("r", Math.sqrt(row.fatalities) * 2)
       .attr("fill", "red")
-      .attr("opacity", 1)
+      .attr("stroke", "rgba(255, 0, 0, 0.5)")
+      .attr("stroke-width", "1%")
+      .attr("opacity", "0.8")
       .attr("id", "point")
       .on("mouseover", function() {
         d3.select(this).attr("opacity", 0.6);
@@ -582,6 +617,7 @@ async function initHistogram() {
   }
 
   window.addEventListener("resize", resizeHisto);
+
   highlightYear("all");
 }
 
