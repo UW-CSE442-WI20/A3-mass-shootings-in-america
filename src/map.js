@@ -246,7 +246,6 @@ async function renderMap() {
 
   for (let j = 0; j < data.length; j++) {
     let row = data[j];
-    console.log(row);
     let coord = [row.longitude, row.latitude];
     let x = projection(coord)[0],
       y = projection(coord)[1];
@@ -458,6 +457,7 @@ async function initFilter() {
   race_filter.addEventListener("change", function() {
     selected_filters.race = $(this).val();
     renderMap();
+    initHistogram();
   });
 
   var location_state_filter = document.getElementById("select_state");
@@ -470,6 +470,7 @@ async function initFilter() {
   location_state_filter.addEventListener("change", function() {
     selected_filters.location_state = $(this).val();
     renderMap();
+    initHistogram();
   });
 
   var gender_filter = document.getElementById("select_gender");
@@ -482,6 +483,7 @@ async function initFilter() {
   gender_filter.addEventListener("change", function() {
     selected_filters.gender = $(this).val();
     renderMap();
+    initHistogram();
   });
 
   var weapon_type_filter = document.getElementById("select_weapon");
@@ -494,6 +496,7 @@ async function initFilter() {
   weapon_type_filter.addEventListener("change", function() {
     selected_filters.weapon_type = $(this).val();
     renderMap();
+    initHistogram();
   });
 
   var mental_filter = document.getElementById("select_mental");
@@ -506,6 +509,7 @@ async function initFilter() {
   mental_filter.addEventListener("change", function() {
     selected_filters.mental = $(this).val();
     renderMap();
+    initHistogram();
   });
 
   var age_filter = document.getElementById("select_age");
@@ -522,6 +526,7 @@ async function initFilter() {
   age_filter.addEventListener("change", function() {
     selected_filters.age = $(this).val();
     renderMap();
+    initHistogram();
   });
 
   var legal_filter = document.getElementById("select_legal");
@@ -534,6 +539,7 @@ async function initFilter() {
   legal_filter.addEventListener("change", function() {
     selected_filters.legal = $(this).val();
     renderMap();
+    initHistogram();
   });
 
   var location_filter = document.getElementById("select_location");
@@ -546,6 +552,7 @@ async function initFilter() {
   location_filter.addEventListener("change", function() {
     selected_filters.location = $(this).val();
     renderMap();
+    initHistogram();
   });
 
   var type_filter = document.getElementById("select_type");
@@ -558,6 +565,7 @@ async function initFilter() {
   type_filter.addEventListener("change", function() {
     selected_filters.type = $(this).val();
     renderMap();
+    initHistogram();
   });
 
   $(".selectpicker").selectpicker("refresh");
@@ -565,6 +573,7 @@ async function initFilter() {
 
 async function initHistogram() {
   // get current width of the slider div
+  document.getElementById("histogram").innerHTML = "";
   var currentWidth = parseInt(d3.select("#slider").style("width"), 10);
 
   var h = 75,
@@ -582,9 +591,10 @@ async function initHistogram() {
     .append("div")
     .attr("class", "tooltip");
 
+  let filtered_year_data = get_year_to_data();
   let dx = 0;
   for (let i = 1982; i < 2020; i++) {
-    let value = year_to_data[i] === undefined ? 0 : year_to_data[i].length;
+    let value = filtered_year_data[i] === undefined ? 0 : filtered_year_data[i].length;
     let dy = h - value * yscale;
 
     graph
@@ -600,7 +610,7 @@ async function initHistogram() {
           y = d3.select(this).attr("y") - 20;
 
         hist_tooltip
-          .html("<b>" + i + ":</b> " + year_to_data[i].length + " shootings ")
+          .html("<b>" + i + ":</b> " + filtered_year_data[i].length + " shootings ")
           .style("left", x + "px")
           .style("top", y + "px")
           .style("opacity", 1);
@@ -658,6 +668,19 @@ async function init() {
   await initHistogram();
   await initSlider();
   await initFilter();
+}
+
+function get_year_to_data(){ // this just filters it
+  let data = filterData();
+  let ret = [];
+  for(let i = 0; i < data.length; i++){
+    if (ret[data[i].year] === undefined) {
+      ret[data[i].year] = [data[i]];
+    } else {
+      ret[data[i].year].push(data[i]);
+    }
+  }
+  return ret;
 }
 
 // resize function for histogram
