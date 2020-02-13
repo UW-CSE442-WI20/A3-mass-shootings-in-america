@@ -636,14 +636,8 @@ async function init() {
     );
 }
 
-<<<<<<< HEAD
 function get_year_to_data(){ // this just filters it
   let data = filterData(allData);
-=======
-function get_year_to_data() {
-  // this just filters it
-  let data = filterData();
->>>>>>> d3dc8075ef6edf39f13b169426545899a7044faf
   let ret = [];
   for (let i = 0; i < data.length; i++) {
     if (ret[data[i].year] === undefined) {
