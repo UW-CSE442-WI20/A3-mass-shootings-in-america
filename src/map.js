@@ -102,11 +102,11 @@ async function parseData() {
   Object.values(filters).forEach(v => (v = v.sort()));
 }
 
-function filterData() {
-  if (curData === undefined) {
+function filterData(data) {
+  if (data === undefined) {
     return [];
   }
-  let filteredData = curData;
+  let filteredData = data;
 
   filteredData =
     selected_filters.race.length > 0
@@ -171,7 +171,7 @@ function filterData() {
 async function renderMap() {
   // Initialize svg object
   document.getElementById("map").innerHTML = "";
-  let data = filterData();
+  let data = filterData(curData);
   map = d3
     .select("#map")
     .append("svg")
@@ -457,6 +457,7 @@ async function initFilter() {
     selected_filters.race = $(this).val();
     renderMap();
     initHistogram();
+    
   });
 
   var location_state_filter = document.getElementById("select_state");
@@ -640,12 +641,14 @@ async function initHistogram() {
   }
 
   window.addEventListener("resize", resizeHisto);
-
   highlightYear("all");
+  if(document.getElementById("slider_year").innerText !== "All Years"){
+    var event = new Event("change");
+    document.getElementById("slider").dispatchEvent(event);
+  };
 }
 
-function highlightYear(year) {
-  console.log(year);
+async function highlightYear(year) {
   let highlight = { color: "steelblue", opacity: 1 };
   let def = { color: "lightgray", opacity: 0.4 };
 
@@ -684,7 +687,7 @@ async function init() {
 }
 
 function get_year_to_data(){ // this just filters it
-  let data = filterData();
+  let data = filterData(allData);
   let ret = [];
   for(let i = 0; i < data.length; i++){
     if (ret[data[i].year] === undefined) {
