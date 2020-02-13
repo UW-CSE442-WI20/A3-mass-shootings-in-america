@@ -1638,7 +1638,9 @@ function zoomed() {
 }
 
 function closePanel() {
-  d3.select("#info").html("").style("opacity", 1).transition().duration(2000).style("opacity", 0).style("height", "0 px");
+  d3.select("#info").style("opacity", 0.6).transition().duration(300).style("opacity", 0).on("end", function () {
+    d3.select("#info").html("");
+  });
 }
 
 function victimCount(count, col) {
@@ -1739,7 +1741,7 @@ function _initFilter() {
             location_state_filter = document.getElementById("select_state");
             filters.location_state.forEach(function (element) {
               var option = document.createElement("option");
-              option.setAttribute("value", element + " fdksl;fd");
+              option.setAttribute("value", element);
               option.innerText = element;
               location_state_filter.appendChild(option);
             });
@@ -2006,10 +2008,6 @@ function _init() {
             return initFilter();
 
           case 11:
-            _context8.next = 13;
-            return d3.select("#info").html("<h3>You can explore the " + "data by year with the slider below, by " + "category with the modal above, zoom in and out" + " of the map, and click on a specific incident for more details.</h3>");
-
-          case 13:
           case "end":
             return _context8.stop();
         }
@@ -2077,7 +2075,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "57034" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "61222" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

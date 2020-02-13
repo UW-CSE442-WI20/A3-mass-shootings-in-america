@@ -40,11 +40,27 @@ h2 {
 h3 {
   font-size: 12pt;
   color: white;
-  opacity: 1;
   margin: 5px;
   animation-name: fadeIn;
   animation-iteration-count: 1;
   animation-duration: 15s;
+  animation-fill-mode: forwards;
+  margin-bottom: -1em;
+}
+
+h3.a {
+  opacity: 0;
+  animation-delay: 1.5s;
+}
+
+h3.b {
+  opacity: 0;
+  animation-delay: 3s;
+}
+
+h3.c {
+  opacity: 0;
+  animation-delay: 4.5s;
 }
 
 h4 {

@@ -465,12 +465,13 @@ function zoomed() {
 
 function closePanel() {
   d3.select("#info")
-    .html("")
-    .style("opacity", 1)
+    .style("opacity", 0.6)
     .transition()
-    .duration(2000)
+    .duration(300)
     .style("opacity", 0)
-    .style("height", "0 px");
+    .on("end", function() {
+      d3.select("#info").html("");
+    });
 }
 
 function victimCount(count, col) {
@@ -572,7 +573,7 @@ async function initFilter() {
   var location_state_filter = document.getElementById("select_state");
   filters.location_state.forEach(element => {
     let option = document.createElement("option");
-    option.setAttribute("value", element + " fdksl;fd");
+    option.setAttribute("value", element);
     option.innerText = element;
     location_state_filter.appendChild(option);
   });
@@ -796,14 +797,6 @@ async function init() {
   await initHistogram();
   await initSlider();
   await initFilter();
-  await d3
-    .select("#info")
-    .html(
-      "<h3>You can explore the " +
-        "data by year with the slider below, by " +
-        "category with the modal above, zoom in and out" +
-        " of the map, and click on a specific incident for more details.</h3>"
-    );
 }
 
 function get_year_to_data() {
