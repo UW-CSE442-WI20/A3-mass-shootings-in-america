@@ -1448,27 +1448,98 @@ function _renderMap() {
 
             map.append("path").attr("class", "map").attr("d", path(topojson.feature(topology, topology.objects.nation))); // Adding state borders
 
-            map.append("path").attr("class", "map").attr("d", path(topojson.feature(topology, topology.objects.states))); // Adding states names to display at the center
+            map.append("path").attr("class", "map").attr("d", path(topojson.feature(topology, topology.objects.states))); // adding lines to ambiguous States
 
+            map.selectAll("path").selectAll("path").data(topojson.feature(topology, topology.objects.states).features).enter().append("line").attr("x1", "0").attr("x2", "100").attr("y1", "0").attr("y2", "100").attr("style", "stroke:rgb(255,0,0);stroke-width:2"); // Adding states names to display at the center
+
+            map.append("text").attr("x", "100").attr("y", "520").attr("text-anchor", "middle").attr("font-size", "10px").attr("style", "font-family: Arial, Helvetica, sans-serif").text("Alaska");
+            map.append("text").attr("x", "675.0748626338498").attr("y", "437").attr("text-anchor", "middle").attr("font-size", "10px").attr("style", "font-family: Arial, Helvetica, sans-serif").text("Alabama");
             map.selectAll("path").data(topojson.feature(topology, topology.objects.states).features).enter().append("text").attr("x", function (d) {
               // maually fixing display
               if (d.properties.name == "Michigan") {
                 return path.centroid(d)[0] + 20;
-              } else if (d.properties.name == "Hawaii") {}
+              } else if (d.properties.name == "Florida") {
+                return path.centroid(d)[0] + 25;
+              }
+
+              if (d.properties.name == "New Hampshire" || d.properties.name == "Rhode Island" || d.properties.name == "Connecticut" || d.properties.name == "Rhode Island") {
+                return path.centroid(d)[0] + 60;
+              }
+
+              if (d.properties.name == "District of Columbia") {
+                return path.centroid(d)[0] + 85;
+              }
+
+              if (d.properties.name == "Massachusetts") {
+                return path.centroid(d)[0] + 65;
+              }
+
+              if (d.properties.name == "Delaware") {
+                return path.centroid(d)[0] + 50;
+              }
+
+              if (d.properties.name == "New Jersey") {
+                return path.centroid(d)[0] + 55;
+              }
 
               return path.centroid(d)[0];
             }).attr("y", function (d) {
               if (d.properties.name == "Michigan") {
                 return path.centroid(d)[1] + 25;
-              } else if (d.properties.name == "Hawaii") {}
+              } else if (d.properties.name == "Florida") {
+                return path.centroid(d)[1] + 25;
+              }
+
+              if (d.properties.name == "New Hampshire" || d.properties.name == "Rhode Island" || d.properties.name == "Connecticut" || d.properties.name == "District of Columbia" || d.properties.name == "New Jersey" || d.properties.name == "Massachusetts" || d.properties.name == "Delaware" || d.properties.name == "Rhode Island") {
+                return path.centroid(d)[1] + 32;
+              }
 
               return path.centroid(d)[1];
-            }).attr("text-anchor", "middle").attr("font-size", "10px").attr("font-family", "Arial, Helvetica, sans-serif").text(function (d) {
-              // Manually erasing states names that are hard to display
-              if (d.properties.name != "New Hampshire" && d.properties.name != "Rhode Island" && d.properties.name != "Connecticut" && d.properties.name != "District of Columbia" && d.properties.name != "New Jersey" && d.properties.name != "Massachusetts" && d.properties.name != "Delaware" && d.properties.name != "Florida") {
-                return d.properties.name;
+            }).attr("text-anchor", "middle").attr("font-size", "10px").attr("style", "font-family: Arial, Helvetica, sans-serif").attr("fill", function (d) {
+              if (d.properties.name == "Hawaii" || d.properties.name == "New Hampshire" || d.properties.name == "Rhode Island" || d.properties.name == "Connecticut" || d.properties.name == "District of Columbia" || d.properties.name == "New Jersey" || d.properties.name == "Massachusetts" || d.properties.name == "Delaware") {
+                return "white";
               }
+            }).attr("stroke", function (d) {
+              if (d.properties.name == "Hawaii" || d.properties.name == "New Hampshire" || d.properties.name == "Rhode Island" || d.properties.name == "Connecticut" || d.properties.name == "District of Columbia" || d.properties.name == "New Jersey" || d.properties.name == "Massachusetts" || d.properties.name == "Delaware") {
+                return "black";
+              }
+            }).attr("stroke-width", function (d) {
+              if (d.properties.name == "New Hampshire" || d.properties.name == "Rhode Island" || d.properties.name == "Connecticut" || d.properties.name == "District of Columbia" || d.properties.name == "New Jersey" || d.properties.name == "Massachusetts" || d.properties.name == "Delaware") {
+                return "0.5px";
+              } else if (d.properties.name == "Hawaii") return "0.1px";
+            }).text(function (d) {
+              // Manually erasing states names that are hard to display
+              return d.properties.name;
             });
+            map.selectAll(".path").data(topojson.feature(topology, topology.objects.states).features).enter().append("line").attr("x1", function (d) {
+              if (d.properties.name == "New Hampshire" || d.properties.name == "Rhode Island" || d.properties.name == "Connecticut" || d.properties.name == "District of Columbia" || d.properties.name == "New Jersey" || d.properties.name == "Massachusetts" || d.properties.name == "Delaware") {
+                return path.centroid(d)[0];
+              }
+
+              return 0;
+            }).attr("x2", function (d) {
+              if (d.properties.name == "New Hampshire" || d.properties.name == "Rhode Island" || d.properties.name == "Connecticut" || d.properties.name == "New Jersey" || d.properties.name == "Massachusetts" || d.properties.name == "Delaware") {
+                return path.centroid(d)[0] + 27;
+              }
+
+              if (d.properties.name == "District of Columbia") {
+                return path.centroid(d)[0] + 40;
+              }
+
+              return 0;
+            }).attr("y1", function (d) {
+              if (d.properties.name == "New Hampshire" || d.properties.name == "Rhode Island" || d.properties.name == "Connecticut" || d.properties.name == "District of Columbia" || d.properties.name == "New Jersey" || d.properties.name == "Massachusetts" || d.properties.name == "Delaware") {
+                return path.centroid(d)[1];
+              }
+
+              return 0;
+            }).attr("y2", function (d) {
+              if (d.properties.name == "New Hampshire" || d.properties.name == "Rhode Island" || d.properties.name == "Connecticut" || d.properties.name == "District of Columbia" || d.properties.name == "New Jersey" || d.properties.name == "Massachusetts" || d.properties.name == "Delaware") {
+                return path.centroid(d)[1] + 25;
+              }
+
+              return 0;
+            }).attr("stroke", "yellow").attr("stroke-width", 1).attr("opacity", 0.8);
 
             _loop = function _loop(j) {
               var row = data[j];
@@ -1492,7 +1563,7 @@ function _renderMap() {
               _loop(j);
             }
 
-          case 12:
+          case 16:
           case "end":
             return _context3.stop();
         }
@@ -1782,9 +1853,7 @@ function _initHistogram() {
               document.getElementById("slider").dispatchEvent(event);
             }
 
-            ;
-
-          case 13:
+          case 12:
           case "end":
             return _context6.stop();
         }
@@ -1948,7 +2017,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55458" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "59178" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
