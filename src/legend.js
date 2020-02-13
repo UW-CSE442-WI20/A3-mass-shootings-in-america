@@ -1,6 +1,19 @@
-const regeneratorRuntime = require("regenerator-runtime");
+import "regenerator-runtime/runtime";
+var legendColors = [
+  "red",
+  "#003f5c",
+  "#1f7a08",
+  "#665191",
+  "#a05195",
+  "#d45087",
+  "#f95d6a",
+  "#ff7c43",
+  "#2f4b7c",
+  "#ffa600"
+];
+
 var topology = require("./us-states.json");
-var map, tooltip, hist_tooltip, info, focus, zoom, view, prevYear;
+var map, tooltip, info, focus, zoom, view, prevYear, legend;
 var width = 975,
   height = 610,
   focus = d3.select(null);
@@ -18,6 +31,7 @@ var largest_year = 0;
 var allData = [];
 var curData = [];
 var year_to_data = {};
+var coord_to_data = {};
 var filters = {
   race: [],
   location_state: [],
@@ -42,12 +56,6 @@ var selected_filters = {
   type: []
 };
 
-var div = d3
-  .select("body")
-  .append("div")
-  .attr("class", "tooltip")
-  .style("opacity", 0);
-
 async function parseData() {
   await d3.csv(data, async function(row) {
     allData.push(row);
@@ -58,14 +66,13 @@ async function parseData() {
     }
     smallest_year = Math.min(smallest_year, parseInt(row.year));
     largest_year = Math.max(largest_year, parseInt(row.year));
-    if (!filters.race.includes(row.race.trim())) {
-      filters.race.push(row.race.trim());
+    if (!filters.race.includes(row.race)) {
+      filters.race.push(row.race);
     }
     let state = row.location.split(", ")[1];
     if (!filters.location_state.includes(state)) {
       filters.location_state.push(state);
     }
-
     if (!filters.gender.includes(row.gender)) {
       filters.gender.push(row.gender);
     }
@@ -81,13 +88,12 @@ async function parseData() {
       filters.mental.push(row.prior_signs_mental_health_issues);
     }
     let rounded_age = Math.floor(parseInt(row.age_of_shooter) / 10) * 10;
-
-    rounded_age =
+    let age_range =
       row.age_of_shooter == "Unclear"
         ? "Unknown"
         : rounded_age + "-" + Number(rounded_age + 9);
-    if (!filters.age.includes(rounded_age)) {
-      filters.age.push(rounded_age);
+    if (!filters.age.includes(age_range)) {
+      filters.age.push(age_range);
     }
     if (!filters.legal.includes(row.weapons_obtained_legally)) {
       filters.legal.push(row.weapons_obtained_legally);
@@ -102,66 +108,122 @@ async function parseData() {
   Object.values(filters).forEach(v => (v = v.sort()));
 }
 
-function filterData(data) {
-  if (data === undefined) {
+function updateLegend(labels) {
+  document.getElementById("legend").innerHTML = "";
+  for (let i = 0; i < labels.length; i++) {
+    let y = 10 + i;
+    let label = labels[i].map(stringify).join(", ");
+    legend = d3
+      .select("#legend")
+      .append("div")
+      .attr("class", "legend-entry");
+
+    legend
+      .append("svg")
+      .attr("class", "legend")
+      .append("circle")
+      .attr("cx", "50%")
+      .attr("cy", "50%")
+      .attr("r", 9)
+      .attr("fill", legendColors[i]);
+
+    legend.append("text").text(label);
+  }
+}
+
+function stringify(label) {
+  let l = label.split(",");
+  switch (l[0]) {
+    case "legal":
+      return l[1] == "Yes"
+        ? "Legally obtained weapons"
+        : l[1] == "No"
+        ? "Illegally obtained weapons"
+        : "Unclear methodaology of weapon obtainment";
+    case "mental":
+      return l[1] == "Yes"
+        ? "Prior indiciation of mental health issues"
+        : l[1] + " prior indication of mental health issues";
+    case "age":
+      return "Age " + l[1];
+    default:
+      return l[1];
+  }
+}
+
+function filterLabels(labels) {
+  let filteredData = curData;
+  labels.forEach(l => {
+    let next = l.split(",");
+    if (next[0] == "race") {
+      filteredData = filteredData.filter(row => row.race == next[1]);
+    }
+    if (next[0] == "gender") {
+      filteredData = filteredData.filter(row => row.gender == next[1]);
+    }
+    if (next[0] == "weapon_type") {
+      filteredData = filteredData.filter(row =>
+        row.weapon_type
+          .split(";")
+          .map(s => s.trim())
+          .includes(next[1])
+      );
+    }
+    if (next[0] == "mental") {
+      filteredData = filteredData.filter(row => row.mental == next[1]);
+    }
+    if (next[0] == "age") {
+      filteredData = filteredData.filter(
+        row => next[1] === Math.floor(parseInt(row.age_of_shooter) / 10) * 10
+      );
+    }
+    if (next[0] == "legal") {
+      filteredData = filteredData.filter(
+        row => row.weapons_obtained_legally == next[1]
+      );
+    }
+    if (next[0] == "location") {
+      filteredData = filteredData.filter(row => row.location_type == next[1]);
+    }
+    if (next[0] == "type") {
+      filteredData = filteredData.filter(row => row.type == next[1]);
+    }
+  });
+  return filteredData;
+}
+
+function filterData() {
+  if (curData === undefined) {
     return [];
   }
-  let filteredData = data;
-
-  filteredData =
-    selected_filters.race.length > 0
-      ? filteredData.filter(row => selected_filters.race.includes(row.race))
-      : filteredData;
-  filteredData =
+  var labels = [];
+  for (let [filter, items] of Object.entries(selected_filters)) {
+    if (filter != "location_state") {
+      if (items.length > 0 && labels.length == 0) {
+        items.forEach(i => labels.push([filter + "," + i]));
+      } else if (items.length == 1) {
+        labels.forEach(l => l.push(filter + "," + items[0]));
+      } else if (items.length > 1) {
+        let temp = [];
+        for (let i = 0; i < items.length; i++) {
+          labels.forEach(l => temp.push(l.concat(filter + "," + items[i])));
+        }
+        labels = temp;
+      }
+    }
+  }
+  curData =
     selected_filters.location_state.length > 0
-      ? filteredData.filter(row =>
+      ? allData.filter(row =>
           selected_filters.location_state.includes(row.location.split(", ")[1])
         )
-      : filteredData;
-  filteredData =
-    selected_filters.gender.length > 0
-      ? filteredData.filter(row => selected_filters.gender.includes(row.gender))
-      : filteredData;
-  filteredData =
-    selected_filters.weapon_type.length > 0
-      ? filteredData.filter(
-          row =>
-            selected_filters.weapon_type.filter(val =>
-              row.weapon_type
-                .split(";")
-                .map(s => s.trim())
-                .includes(val)
-            ).length > 0
-        )
-      : filteredData;
-  filteredData =
-    selected_filters.mental.length > 0
-      ? filteredData.filter(row =>
-          selected_filters.mental.includes(row.prior_signs_mental_health_issues)
-        )
-      : filteredData;
-  filteredData =
-    selected_filters.age.length > 0
-      ? filteredData.filter(row =>
-          selected_filters.age.includes("" + row.age_of_shooter.substring(0, 1))
-        )
-      : filteredData;
-  filteredData =
-    selected_filters.legal.length > 0
-      ? filteredData.filter(row =>
-          selected_filters.legal.includes(row.weapons_obtained_legally)
-        )
-      : filteredData;
-  filteredData =
-    selected_filters.location.length > 0
-      ? filteredData.filter(row =>
-          selected_filters.location.includes(row.location_type)
-        )
-      : filteredData;
-  filteredData =
-    selected_filters.type.length > 0
-      ? filteredData.filter(row => selected_filters.type.includes(row.type))
-      : filteredData;
+      : allData;
+  updateLegend(labels);
+  if (labels.length == 0) {
+    return [curData];
+  }
+  let filteredData = [];
+  labels.forEach(l => filteredData.push(filterLabels(l)));
 
   return filteredData;
 }
@@ -169,7 +231,7 @@ function filterData(data) {
 async function renderMap() {
   // Initialize svg object
   document.getElementById("map").innerHTML = "";
-  let data = filterData(curData);
+  let filteredData = filterData();
   map = d3
     .select("#map")
     .append("svg")
@@ -182,6 +244,13 @@ async function renderMap() {
     .select("#map")
     .append("div")
     .attr("class", "tooltip");
+
+  info = d3
+    .select("#map")
+    .append("div")
+    .attr("class", "info")
+    .attr("height", "0px");
+
   zoom = d3
     .zoom()
     .scaleExtent([1, 8])
@@ -207,84 +276,51 @@ async function renderMap() {
     .attr("class", "map")
     .attr("d", path(topojson.feature(topology, topology.objects.states)));
 
-  // Adding states names to display at the center
-  map
-    .selectAll("path")
-    .data(topojson.feature(topology, topology.objects.states).features)
-    .enter()
-    .append("text")
-    .attr("x", function(d) {
-      // maually fixing display
-      if (d.properties.name == "Michigan") {
-        return path.centroid(d)[0] + 20;
-      } else if (d.properties.name == "Hawaii") {
-      }
-      return path.centroid(d)[0];
-    })
-    .attr("y", function(d) {
-      if (d.properties.name == "Michigan") {
-        return path.centroid(d)[1] + 25;
-      } else if (d.properties.name == "Hawaii") {
-      }
-      return path.centroid(d)[1];
-    })
-    .attr("text-anchor", "middle")
-    .attr("font-size", "10px")
-    .attr("font-family", "Arial, Helvetica, sans-serif")
-    .text(function(d) {
-      // Manually erasing states names that are hard to display
-      if (
-        d.properties.name != "New Hampshire" &&
-        d.properties.name != "Rhode Island" &&
-        d.properties.name != "Connecticut" &&
-        d.properties.name != "District of Columbia" &&
-        d.properties.name != "New Jersey" &&
-        d.properties.name != "Massachusetts" &&
-        d.properties.name != "Delaware" &&
-        d.properties.name != "Florida"
-      ) {
-        return d.properties.name;
-      }
-    });
+  for (let k = 0; k < filteredData.length; k++) {
+    let data = filteredData[k];
+    console.log(legendColors[k]);
+    for (let i = 0; i < data.length; i++) {
+      let row = data[i];
+      let coord = [row.longitude, row.latitude];
+      let x = projection(coord)[0],
+        y = projection(coord)[1];
 
-  for (let j = 0; j < data.length; j++) {
-    let row = data[j];
-    let coord = [row.longitude, row.latitude];
-    let x = projection(coord)[0],
-      y = projection(coord)[1];
+      // Adding circles
+      map
+        .append("circle")
+        .attr("cx", x)
+        .attr("cy", y)
+        .attr("r", Math.sqrt(row.fatalities) * 2)
+        .attr("fill", legendColors[k])
+        .attr("opacity", 1)
+        .attr("id", "point")
+        .on("mouseover", function() {
+          d3.select(this).attr("opacity", 0.6);
+          tooltip
+            .html(row.case)
+            .style("left", d3.event.pageX + 5 + "px")
+            .style("top", d3.event.pageY - 20 + "px")
+            .style("opacity", 1);
+        })
+        .on("mouseout", function() {
+          d3.select(this).attr("opacity", 1);
+          tooltip.html("").style("opacity", 0);
+        })
+        .on("click", handleClick);
+      coord_to_data[(Math.round(x), Math.round(y))] = row;
+    }
+  }
+}
 
-    // Adding circles
-    map
-      .append("circle")
-      .attr("cx", x)
-      .attr("cy", y)
-      .attr("r", Math.sqrt(row.fatalities) * 2)
-      .attr("fill", "red")
-      .attr("stroke", "rgba(255, 0, 0, 0.5)")
-      .attr("stroke-width", "1%")
-      .attr("opacity", "0.8")
-      .attr("id", "point")
-      .on("mouseover", function() {
-        d3.select(this).attr("opacity", 0.6);
-        div
-          .transition()
-          .duration(200)
-          .style("opacity", 0.9);
-        div
-          .html(row.case + "<br/>" + row.fatalities + " casualties")
-          .style("left", d3.event.pageX + "px")
-          .style("top", d3.event.pageY - 28 + "px");
-      })
-      .on("mouseout", function() {
-        d3.select(this).attr("opacity", 1);
-        div
-          .transition()
-          .duration(500)
-          .style("opacity", 0);
-      })
-      .on("click", function() {
-        openPanel(row);
-      });
+function handleClick() {
+  if (this == focus.node() || this["id"] === "map") {
+    focus = d3.select(null);
+    closePanel();
+  } else if (this["id"] === "point") {
+    focus = d3.select(this);
+    let x = Math.round(focus._groups[0][0]["cx"].baseVal.value),
+      y = Math.round(focus._groups[0][0]["cy"].baseVal.value);
+    openPanel(coord_to_data[(x, y)]);
   }
 }
 
@@ -293,64 +329,40 @@ function zoomed() {
 }
 
 function closePanel() {
-  d3.select("#info")
+  info
     .html("")
-    .style("opacity", 1)
     .transition()
-    .duration(2000)
+    .duration(1000)
     .style("opacity", 0)
     .style("height", "0 px");
 }
 
-function victimCount(count, col) {
-  let ret = "";
-  for (let i = 0; i < count; i++) {
-    ret +=
-      "<i class=material-icons style=font-size:14px;color:" +
-      col +
-      ";>person</i>";
-  }
-  return ret;
-}
-
 function openPanel(pointData) {
-  closePanel();
-  let fat = pointData.fatalities,
-    inj = pointData.injured;
-  var content =
-    "<div class=info_panel><div class=title>" +
-    pointData.case +
-    "</div><br><div class=info>" +
-    "<i class=material-icons style=font-size:14px;color:black;>location_on</i>  " +
-    pointData.location +
-    "<br><i class=material-icons style=font-size:14px;color:black;>date_range</i>  " +
-    pointData.date +
-    "</div><div class=stat-container>" +
-    "<div class=stat><div class=cat>Fatalities<br><h6>" +
-    fat +
-    "</h6></div>" +
-    "<div class=count>" +
-    victimCount(fat, "darkred") +
-    "</div></div>" +
-    "<div class=stat><div class=cat>Injured<br><h6>" +
-    inj +
-    "</h6></div>" +
-    "<stat class=count>" +
-    victimCount(inj, "orangered") +
-    "</div></div><div class=desc>" +
-    pointData.summary +
-    "<br><center><br><button id=wb class=btn>X</button></div>";
+  var externalLink = pointData.sources.split(";")[0];
+  var embedd =
+    "<iframe sandbox=allow-scripts width=" +
+    100 +
+    "% height= " +
+    height / 2 +
+    " src=" +
+    externalLink +
+    "</iframe>";
 
-  d3.select("#info")
-    .html(content)
-    .style("opacity", 0)
-    .style("height", 0)
+  info
+    .html(embedd)
     .transition()
-    .duration(700)
-    .style("opacity", 0.6)
-    .style("height", "auto");
+    .duration(1000)
+    .style("opacity", 1)
+    .style("height", height / 2 + "px");
 
-  document.getElementById("wb").addEventListener("click", closePanel);
+  info
+    .append("div")
+    .attr("class", "info-button")
+    .text(pointData.case)
+    .append("button")
+    .style("border", "none")
+    .text("X")
+    .on("click", closePanel);
 }
 
 async function initSlider() {
@@ -395,8 +407,6 @@ async function initFilter() {
   race_filter.addEventListener("change", function() {
     selected_filters.race = $(this).val();
     renderMap();
-    initHistogram();
-    
   });
 
   var location_state_filter = document.getElementById("select_state");
@@ -409,7 +419,6 @@ async function initFilter() {
   location_state_filter.addEventListener("change", function() {
     selected_filters.location_state = $(this).val();
     renderMap();
-    initHistogram();
   });
 
   var gender_filter = document.getElementById("select_gender");
@@ -422,7 +431,6 @@ async function initFilter() {
   gender_filter.addEventListener("change", function() {
     selected_filters.gender = $(this).val();
     renderMap();
-    initHistogram();
   });
 
   var weapon_type_filter = document.getElementById("select_weapon");
@@ -435,7 +443,6 @@ async function initFilter() {
   weapon_type_filter.addEventListener("change", function() {
     selected_filters.weapon_type = $(this).val();
     renderMap();
-    initHistogram();
   });
 
   var mental_filter = document.getElementById("select_mental");
@@ -448,20 +455,18 @@ async function initFilter() {
   mental_filter.addEventListener("change", function() {
     selected_filters.mental = $(this).val();
     renderMap();
-    initHistogram();
   });
 
   var age_filter = document.getElementById("select_age");
   filters.age.forEach(element => {
     let option = document.createElement("option");
-    option.setAttribute("value", element.substring(0, 1));
-    option.innerText = "" + element;
+    option.setAttribute("value", element);
+    option.innerText = element;
     age_filter.appendChild(option);
   });
   age_filter.addEventListener("change", function() {
     selected_filters.age = $(this).val();
     renderMap();
-    initHistogram();
   });
 
   var legal_filter = document.getElementById("select_legal");
@@ -474,7 +479,6 @@ async function initFilter() {
   legal_filter.addEventListener("change", function() {
     selected_filters.legal = $(this).val();
     renderMap();
-    initHistogram();
   });
 
   var location_filter = document.getElementById("select_location");
@@ -487,7 +491,6 @@ async function initFilter() {
   location_filter.addEventListener("change", function() {
     selected_filters.location = $(this).val();
     renderMap();
-    initHistogram();
   });
 
   var type_filter = document.getElementById("select_type");
@@ -500,55 +503,26 @@ async function initFilter() {
   type_filter.addEventListener("change", function() {
     selected_filters.type = $(this).val();
     renderMap();
-    initHistogram();
-  });
-
-  document.getElementById("filter_reset").addEventListener("click", function() {
-    $(".selectpicker").val("default");
-    $(".selectpicker").selectpicker("refresh");
-    selected_filters = {
-      race: [],
-      location_state: [],
-      gender: [],
-      weapon_type: [],
-      mental: [],
-      age: [],
-      legal: [],
-      location: [],
-      type: []
-    };
-    renderMap();
-    initHistogram();
   });
 
   $(".selectpicker").selectpicker("refresh");
 }
 
 async function initHistogram() {
-  // get current width of the slider div
-  document.getElementById("histogram").innerHTML = "";
-  var currentWidth = parseInt(d3.select("#slider").style("width"), 10);
-
   var h = 75,
-    w = currentWidth,
-    xscale = w / 39,
+    w = 750,
+    xscale = 750 / 40,
     yscale = 6;
   var graph = d3
     .select("#histogram")
     .append("svg")
     .attr("height", h)
     .attr("width", w)
-    .attr("id", "svg-histogram");
-  hist_tooltip = d3
-    .select("#histogram")
-    .append("div")
-    .attr("class", "tooltip");
+    .attr("id", "histogram");
 
-  let filtered_year_data = get_year_to_data();
   let dx = 0;
   for (let i = 1982; i < 2020; i++) {
-    let value =
-      filtered_year_data[i] === undefined ? 0 : filtered_year_data[i].length;
+    let value = year_to_data[i] === undefined ? 0 : year_to_data[i].length;
     let dy = h - value * yscale;
 
     graph
@@ -558,39 +532,18 @@ async function initHistogram() {
       .attr("x", dx)
       .attr("y", dy)
       .attr("id", "y_" + i)
-      .style("stroke", "black")
-      .on("mouseover", function() {
-        let x = d3.select(this).attr("x"),
-          y = d3.select(this).attr("y") - 20;
-
-        hist_tooltip
-          .html(
-            "<b>" + i + ":</b> " + filtered_year_data[i].length + " shootings "
-          )
-          .style("left", x + "px")
-          .style("top", y + "px")
-          .style("opacity", 1);
-      })
-      .on("mouseout", function() {
-        hist_tooltip.html("").style("opacity", 0);
-      })
-      .on("click", function() {
-        var event = new Event("change");
+      .on("click", function(d) {
+        console.log("here");
         document.getElementById("slider").value = i;
-        document.getElementById("slider").dispatchEvent(event);
-      });
-    dx += xscale + 1;
+      })
+      .style("stroke", "black");
+    dx += xscale + 1.5;
   }
 
-  window.addEventListener("resize", resizeHisto);
   highlightYear("all");
-  if(document.getElementById("slider_year").innerText !== "All Years"){
-    var event = new Event("change");
-    document.getElementById("slider").dispatchEvent(event);
-  };
 }
 
-async function highlightYear(year) {
+function highlightYear(year) {
   let highlight = { color: "steelblue", opacity: 1 };
   let def = { color: "lightgray", opacity: 0.4 };
 
@@ -626,52 +579,6 @@ async function init() {
   await initHistogram();
   await initSlider();
   await initFilter();
-  await d3
-    .select("#info")
-    .html(
-      "<h3>You can explore the " +
-        "data by year with the slider below, by " +
-        "category with the modal above, zoom in and out" +
-        " of the map, and click on a specific incident for more details.</h3>"
-    );
-}
-
-<<<<<<< HEAD
-function get_year_to_data(){ // this just filters it
-  let data = filterData(allData);
-=======
-function get_year_to_data() {
-  // this just filters it
-  let data = filterData();
->>>>>>> d3dc8075ef6edf39f13b169426545899a7044faf
-  let ret = [];
-  for (let i = 0; i < data.length; i++) {
-    if (ret[data[i].year] === undefined) {
-      ret[data[i].year] = [data[i]];
-    } else {
-      ret[data[i].year].push(data[i]);
-    }
-  }
-  return ret;
-}
-
-// resize function for histogram
-function resizeHisto() {
-  var currentWidth = parseInt(d3.select("#slider").style("width"), 10);
-  var w = currentWidth,
-    xscale = w / 40;
-  var graph = d3.select("#histogram").attr("width", w);
-
-  var svg = d3.select("#svg-histogram").attr("width", w);
-
-  var histo = d3
-    .select("#svg-histogram")
-    .selectAll("rect")
-    .attr("width", xscale);
-
-  histo.selectAll("rect").each(function(d, i) {
-    d3.select(this).attr("x", xscale * i);
-  });
 }
 
 init();

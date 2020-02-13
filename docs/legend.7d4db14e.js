@@ -1227,16 +1227,28 @@ module.exports = {
 };
 },{}],"data.csv":[function(require,module,exports) {
 module.exports = "/data.7074662a.csv";
-},{}],"map.js":[function(require,module,exports) {
+},{}],"legend.js":[function(require,module,exports) {
+"use strict";
+
+require("regenerator-runtime/runtime");
+
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
+
+function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
-var regeneratorRuntime = require("regenerator-runtime");
+var legendColors = ["red", "#003f5c", "#1f7a08", "#665191", "#a05195", "#d45087", "#f95d6a", "#ff7c43", "#2f4b7c", "#ffa600"];
 
 var topology = require("./us-states.json");
 
-var map, tooltip, hist_tooltip, info, focus, zoom, view, prevYear;
+var map, tooltip, info, focus, zoom, view, prevYear, legend;
 var width = 975,
     height = 610,
     focus = d3.select(null);
@@ -1250,6 +1262,7 @@ var largest_year = 0;
 var allData = [];
 var curData = [];
 var year_to_data = {};
+var coord_to_data = {};
 var filters = {
   race: [],
   location_state: [],
@@ -1272,7 +1285,6 @@ var selected_filters = {
   location: [],
   type: []
 };
-var div = d3.select("body").append("div").attr("class", "tooltip").style("opacity", 0);
 
 function parseData() {
   return _parseData.apply(this, arguments);
@@ -1293,7 +1305,7 @@ function _parseData() {
               var _ref = _asyncToGenerator(
               /*#__PURE__*/
               regeneratorRuntime.mark(function _callee(row) {
-                var state, weapons, rounded_age;
+                var state, weapons, rounded_age, age_range;
                 return regeneratorRuntime.wrap(function _callee$(_context) {
                   while (1) {
                     switch (_context.prev = _context.next) {
@@ -1309,8 +1321,8 @@ function _parseData() {
                         smallest_year = Math.min(smallest_year, parseInt(row.year));
                         largest_year = Math.max(largest_year, parseInt(row.year));
 
-                        if (!filters.race.includes(row.race.trim())) {
-                          filters.race.push(row.race.trim());
+                        if (!filters.race.includes(row.race)) {
+                          filters.race.push(row.race);
                         }
 
                         state = row.location.split(", ")[1];
@@ -1337,10 +1349,10 @@ function _parseData() {
                         }
 
                         rounded_age = Math.floor(parseInt(row.age_of_shooter) / 10) * 10;
-                        rounded_age = row.age_of_shooter == "Unclear" ? "Unknown" : rounded_age + "-" + Number(rounded_age + 9);
+                        age_range = row.age_of_shooter == "Unclear" ? "Unknown" : rounded_age + "-" + Number(rounded_age + 9);
 
-                        if (!filters.age.includes(rounded_age)) {
-                          filters.age.push(rounded_age);
+                        if (!filters.age.includes(age_range)) {
+                          filters.age.push(age_range);
                         }
 
                         if (!filters.legal.includes(row.weapons_obtained_legally)) {
@@ -1383,43 +1395,152 @@ function _parseData() {
   return _parseData.apply(this, arguments);
 }
 
+function updateLegend(labels) {
+  document.getElementById("legend").innerHTML = "";
+
+  for (var i = 0; i < labels.length; i++) {
+    var y = 10 + i;
+    var label = labels[i].map(stringify).join(", ");
+    legend = d3.select("#legend").append("div").attr("class", "legend-entry");
+    legend.append("svg").attr("class", "legend").append("circle").attr("cx", "50%").attr("cy", "50%").attr("r", 9).attr("fill", legendColors[i]);
+    legend.append("text").text(label);
+  }
+}
+
+function stringify(label) {
+  var l = label.split(",");
+
+  switch (l[0]) {
+    case "legal":
+      return l[1] == "Yes" ? "Legally obtained weapons" : l[1] == "No" ? "Illegally obtained weapons" : "Unclear methodaology of weapon obtainment";
+
+    case "mental":
+      return l[1] == "Yes" ? "Prior indiciation of mental health issues" : l[1] + " prior indication of mental health issues";
+
+    case "age":
+      return "Age " + l[1];
+
+    default:
+      return l[1];
+  }
+}
+
+function filterLabels(labels) {
+  var filteredData = curData;
+  labels.forEach(function (l) {
+    var next = l.split(",");
+
+    if (next[0] == "race") {
+      filteredData = filteredData.filter(function (row) {
+        return row.race == next[1];
+      });
+    }
+
+    if (next[0] == "gender") {
+      filteredData = filteredData.filter(function (row) {
+        return row.gender == next[1];
+      });
+    }
+
+    if (next[0] == "weapon_type") {
+      filteredData = filteredData.filter(function (row) {
+        return row.weapon_type.split(";").map(function (s) {
+          return s.trim();
+        }).includes(next[1]);
+      });
+    }
+
+    if (next[0] == "mental") {
+      filteredData = filteredData.filter(function (row) {
+        return row.mental == next[1];
+      });
+    }
+
+    if (next[0] == "age") {
+      filteredData = filteredData.filter(function (row) {
+        return next[1] === Math.floor(parseInt(row.age_of_shooter) / 10) * 10;
+      });
+    }
+
+    if (next[0] == "legal") {
+      filteredData = filteredData.filter(function (row) {
+        return row.weapons_obtained_legally == next[1];
+      });
+    }
+
+    if (next[0] == "location") {
+      filteredData = filteredData.filter(function (row) {
+        return row.location_type == next[1];
+      });
+    }
+
+    if (next[0] == "type") {
+      filteredData = filteredData.filter(function (row) {
+        return row.type == next[1];
+      });
+    }
+  });
+  return filteredData;
+}
+
 function filterData() {
   if (curData === undefined) {
     return [];
   }
 
-  var filteredData = curData;
-  filteredData = selected_filters.race.length > 0 ? filteredData.filter(function (row) {
-    return selected_filters.race.includes(row.race);
-  }) : filteredData;
-  filteredData = selected_filters.location_state.length > 0 ? filteredData.filter(function (row) {
+  var labels = [];
+
+  var _loop = function _loop() {
+    var _Object$entries$_i = _slicedToArray(_Object$entries[_i], 2),
+        filter = _Object$entries$_i[0],
+        items = _Object$entries$_i[1];
+
+    if (filter != "location_state") {
+      if (items.length > 0 && labels.length == 0) {
+        items.forEach(function (i) {
+          return labels.push([filter + "," + i]);
+        });
+      } else if (items.length == 1) {
+        labels.forEach(function (l) {
+          return l.push(filter + "," + items[0]);
+        });
+      } else if (items.length > 1) {
+        (function () {
+          var temp = [];
+
+          var _loop2 = function _loop2(i) {
+            labels.forEach(function (l) {
+              return temp.push(l.concat(filter + "," + items[i]));
+            });
+          };
+
+          for (var i = 0; i < items.length; i++) {
+            _loop2(i);
+          }
+
+          labels = temp;
+        })();
+      }
+    }
+  };
+
+  for (var _i = 0, _Object$entries = Object.entries(selected_filters); _i < _Object$entries.length; _i++) {
+    _loop();
+  }
+
+  curData = selected_filters.location_state.length > 0 ? allData.filter(function (row) {
     return selected_filters.location_state.includes(row.location.split(", ")[1]);
-  }) : filteredData;
-  filteredData = selected_filters.gender.length > 0 ? filteredData.filter(function (row) {
-    return selected_filters.gender.includes(row.gender);
-  }) : filteredData;
-  filteredData = selected_filters.weapon_type.length > 0 ? filteredData.filter(function (row) {
-    return selected_filters.weapon_type.filter(function (val) {
-      return row.weapon_type.split(";").map(function (s) {
-        return s.trim();
-      }).includes(val);
-    }).length > 0;
-  }) : filteredData;
-  filteredData = selected_filters.mental.length > 0 ? filteredData.filter(function (row) {
-    return selected_filters.mental.includes(row.prior_signs_mental_health_issues);
-  }) : filteredData;
-  filteredData = selected_filters.age.length > 0 ? filteredData.filter(function (row) {
-    return selected_filters.age.includes("" + row.age_of_shooter.substring(0, 1));
-  }) : filteredData;
-  filteredData = selected_filters.legal.length > 0 ? filteredData.filter(function (row) {
-    return selected_filters.legal.includes(row.weapons_obtained_legally);
-  }) : filteredData;
-  filteredData = selected_filters.location.length > 0 ? filteredData.filter(function (row) {
-    return selected_filters.location.includes(row.location_type);
-  }) : filteredData;
-  filteredData = selected_filters.type.length > 0 ? filteredData.filter(function (row) {
-    return selected_filters.type.includes(row.type);
-  }) : filteredData;
+  }) : allData;
+  updateLegend(labels);
+
+  if (labels.length == 0) {
+    return [curData];
+  }
+
+  var filteredData = [];
+  labels.forEach(function (l) {
+    return filteredData.push(filterLabels(l));
+  });
   return filteredData;
 }
 
@@ -1431,7 +1552,7 @@ function _renderMap() {
   _renderMap = _asyncToGenerator(
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee3() {
-    var data, _loop, j;
+    var filteredData, k, _data, _loop3, i;
 
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
@@ -1439,60 +1560,44 @@ function _renderMap() {
           case 0:
             // Initialize svg object
             document.getElementById("map").innerHTML = "";
-            data = filterData();
+            filteredData = filterData();
             map = d3.select("#map").append("svg").attr("width", width).attr("height", height).attr("id", "map").append("g");
             tooltip = d3.select("#map").append("div").attr("class", "tooltip");
+            info = d3.select("#map").append("div").attr("class", "info").attr("height", "0px");
             zoom = d3.zoom().scaleExtent([1, 8]).on("zoom", zoomed);
             view = map.append("rect").attr("width", width).attr("height", height).style("fill", "none").style("pointer-events", "all");
             map.call(zoom); // Adding usa border
 
             map.append("path").attr("class", "map").attr("d", path(topojson.feature(topology, topology.objects.nation))); // Adding state borders
 
-            map.append("path").attr("class", "map").attr("d", path(topojson.feature(topology, topology.objects.states))); // Adding states names to display at the center
+            map.append("path").attr("class", "map").attr("d", path(topojson.feature(topology, topology.objects.states)));
 
-            map.selectAll("path").data(topojson.feature(topology, topology.objects.states).features).enter().append("text").attr("x", function (d) {
-              // maually fixing display
-              if (d.properties.name == "Michigan") {
-                return path.centroid(d)[0] + 20;
-              } else if (d.properties.name == "Hawaii") {}
+            for (k = 0; k < filteredData.length; k++) {
+              _data = filteredData[k];
+              console.log(legendColors[k]);
 
-              return path.centroid(d)[0];
-            }).attr("y", function (d) {
-              if (d.properties.name == "Michigan") {
-                return path.centroid(d)[1] + 25;
-              } else if (d.properties.name == "Hawaii") {}
+              _loop3 = function _loop3(i) {
+                var row = _data[i];
+                var coord = [row.longitude, row.latitude];
+                var x = projection(coord)[0],
+                    y = projection(coord)[1]; // Adding circles
 
-              return path.centroid(d)[1];
-            }).attr("text-anchor", "middle").attr("font-size", "10px").attr("font-family", "Arial, Helvetica, sans-serif").text(function (d) {
-              // Manually erasing states names that are hard to display
-              if (d.properties.name != "New Hampshire" && d.properties.name != "Rhode Island" && d.properties.name != "Connecticut" && d.properties.name != "District of Columbia" && d.properties.name != "New Jersey" && d.properties.name != "Massachusetts" && d.properties.name != "Delaware" && d.properties.name != "Florida") {
-                return d.properties.name;
+                map.append("circle").attr("cx", x).attr("cy", y).attr("r", Math.sqrt(row.fatalities) * 2).attr("fill", legendColors[k]).attr("opacity", 1).attr("id", "point").on("mouseover", function () {
+                  d3.select(this).attr("opacity", 0.6);
+                  tooltip.html(row.case).style("left", d3.event.pageX + 5 + "px").style("top", d3.event.pageY - 20 + "px").style("opacity", 1);
+                }).on("mouseout", function () {
+                  d3.select(this).attr("opacity", 1);
+                  tooltip.html("").style("opacity", 0);
+                }).on("click", handleClick);
+                coord_to_data[(Math.round(x), Math.round(y))] = row;
+              };
+
+              for (i = 0; i < _data.length; i++) {
+                _loop3(i);
               }
-            });
-
-            _loop = function _loop(j) {
-              var row = data[j];
-              var coord = [row.longitude, row.latitude];
-              var x = projection(coord)[0],
-                  y = projection(coord)[1]; // Adding circles
-
-              map.append("circle").attr("cx", x).attr("cy", y).attr("r", Math.sqrt(row.fatalities) * 2).attr("fill", "red").attr("stroke", "rgba(255, 0, 0, 0.5)").attr("stroke-width", "1%").attr("opacity", "0.8").attr("id", "point").on("mouseover", function () {
-                d3.select(this).attr("opacity", 0.6);
-                div.transition().duration(200).style("opacity", 0.9);
-                div.html(row.case + "<br/>" + row.fatalities + " casualties").style("left", d3.event.pageX + "px").style("top", d3.event.pageY - 28 + "px");
-              }).on("mouseout", function () {
-                d3.select(this).attr("opacity", 1);
-                div.transition().duration(500).style("opacity", 0);
-              }).on("click", function () {
-                openPanel(row);
-              });
-            };
-
-            for (j = 0; j < data.length; j++) {
-              _loop(j);
             }
 
-          case 12:
+          case 11:
           case "end":
             return _context3.stop();
         }
@@ -1502,31 +1607,31 @@ function _renderMap() {
   return _renderMap.apply(this, arguments);
 }
 
+function handleClick() {
+  if (this == focus.node() || this["id"] === "map") {
+    focus = d3.select(null);
+    closePanel();
+  } else if (this["id"] === "point") {
+    focus = d3.select(this);
+    var x = Math.round(focus._groups[0][0]["cx"].baseVal.value),
+        y = Math.round(focus._groups[0][0]["cy"].baseVal.value);
+    openPanel(coord_to_data[(x, y)]);
+  }
+}
+
 function zoomed() {
   map.attr("transform", d3.event.transform);
 }
 
 function closePanel() {
-  d3.select("#info").html("").style("opacity", 1).transition().duration(2000).style("opacity", 0).style("height", "0 px");
-}
-
-function victimCount(count, col) {
-  var ret = "";
-
-  for (var i = 0; i < count; i++) {
-    ret += "<i class=material-icons style=font-size:14px;color:" + col + ";>person</i>";
-  }
-
-  return ret;
+  info.html("").transition().duration(1000).style("opacity", 0).style("height", "0 px");
 }
 
 function openPanel(pointData) {
-  closePanel();
-  var fat = pointData.fatalities,
-      inj = pointData.injured;
-  var content = "<div class=info_panel><div class=title>" + pointData.case + "</div><br><div class=info>" + "<i class=material-icons style=font-size:14px;color:black;>location_on</i>  " + pointData.location + "<br><i class=material-icons style=font-size:14px;color:black;>date_range</i>  " + pointData.date + "</div><div class=stat-container>" + "<div class=stat><div class=cat>Fatalities<br><h6>" + fat + "</h6></div>" + "<div class=count>" + victimCount(fat, "darkred") + "</div></div>" + "<div class=stat><div class=cat>Injured<br><h6>" + inj + "</h6></div>" + "<stat class=count>" + victimCount(inj, "orangered") + "</div></div><div class=desc>" + pointData.summary + "<br><center><br><button id=wb class=btn>X</button></div>";
-  d3.select("#info").html(content).style("opacity", 0).style("height", 0).transition().duration(700).style("opacity", 0.6).style("height", "auto");
-  document.getElementById("wb").addEventListener("click", closePanel);
+  var externalLink = pointData.sources.split(";")[0];
+  var embedd = "<iframe sandbox=allow-scripts width=" + 100 + "% height= " + height / 2 + " src=" + externalLink + "</iframe>";
+  info.html(embedd).transition().duration(1000).style("opacity", 1).style("height", height / 2 + "px");
+  info.append("div").attr("class", "info-button").text(pointData.case).append("button").style("border", "none").text("X").on("click", closePanel);
 }
 
 function initSlider() {
@@ -1603,7 +1708,6 @@ function _initFilter() {
             race_filter.addEventListener("change", function () {
               selected_filters.race = $(this).val();
               renderMap();
-              initHistogram();
             });
             location_state_filter = document.getElementById("select_state");
             filters.location_state.forEach(function (element) {
@@ -1615,7 +1719,6 @@ function _initFilter() {
             location_state_filter.addEventListener("change", function () {
               selected_filters.location_state = $(this).val();
               renderMap();
-              initHistogram();
             });
             gender_filter = document.getElementById("select_gender");
             filters.gender.forEach(function (element) {
@@ -1627,7 +1730,6 @@ function _initFilter() {
             gender_filter.addEventListener("change", function () {
               selected_filters.gender = $(this).val();
               renderMap();
-              initHistogram();
             });
             weapon_type_filter = document.getElementById("select_weapon");
             filters.weapon_type.forEach(function (element) {
@@ -1639,7 +1741,6 @@ function _initFilter() {
             weapon_type_filter.addEventListener("change", function () {
               selected_filters.weapon_type = $(this).val();
               renderMap();
-              initHistogram();
             });
             mental_filter = document.getElementById("select_mental");
             filters.mental.forEach(function (element) {
@@ -1651,19 +1752,17 @@ function _initFilter() {
             mental_filter.addEventListener("change", function () {
               selected_filters.mental = $(this).val();
               renderMap();
-              initHistogram();
             });
             age_filter = document.getElementById("select_age");
             filters.age.forEach(function (element) {
               var option = document.createElement("option");
-              option.setAttribute("value", element.substring(0, 1));
-              option.innerText = "" + element;
+              option.setAttribute("value", element);
+              option.innerText = element;
               age_filter.appendChild(option);
             });
             age_filter.addEventListener("change", function () {
               selected_filters.age = $(this).val();
               renderMap();
-              initHistogram();
             });
             legal_filter = document.getElementById("select_legal");
             filters.legal.forEach(function (element) {
@@ -1675,7 +1774,6 @@ function _initFilter() {
             legal_filter.addEventListener("change", function () {
               selected_filters.legal = $(this).val();
               renderMap();
-              initHistogram();
             });
             location_filter = document.getElementById("select_location");
             filters.location.forEach(function (element) {
@@ -1687,7 +1785,6 @@ function _initFilter() {
             location_filter.addEventListener("change", function () {
               selected_filters.location = $(this).val();
               renderMap();
-              initHistogram();
             });
             type_filter = document.getElementById("select_type");
             filters.type.forEach(function (element) {
@@ -1699,28 +1796,10 @@ function _initFilter() {
             type_filter.addEventListener("change", function () {
               selected_filters.type = $(this).val();
               renderMap();
-              initHistogram();
-            });
-            document.getElementById("filter_reset").addEventListener("click", function () {
-              $(".selectpicker").val("default");
-              $(".selectpicker").selectpicker("refresh");
-              selected_filters = {
-                race: [],
-                location_state: [],
-                gender: [],
-                weapon_type: [],
-                mental: [],
-                age: [],
-                legal: [],
-                location: [],
-                type: []
-              };
-              renderMap();
-              initHistogram();
             });
             $(".selectpicker").selectpicker("refresh");
 
-          case 29:
+          case 28:
           case "end":
             return _context5.stop();
         }
@@ -1738,46 +1817,33 @@ function _initHistogram() {
   _initHistogram = _asyncToGenerator(
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee6() {
-    var currentWidth, h, w, xscale, yscale, graph, filtered_year_data, dx, _loop2, i;
+    var h, w, xscale, yscale, graph, dx, _loop4, i;
 
     return regeneratorRuntime.wrap(function _callee6$(_context6) {
       while (1) {
         switch (_context6.prev = _context6.next) {
           case 0:
-            // get current width of the slider div
-            document.getElementById("histogram").innerHTML = "";
-            currentWidth = parseInt(d3.select("#slider").style("width"), 10);
-            h = 75, w = currentWidth, xscale = w / 39, yscale = 6;
-            graph = d3.select("#histogram").append("svg").attr("height", h).attr("width", w).attr("id", "svg-histogram");
-            hist_tooltip = d3.select("#histogram").append("div").attr("class", "tooltip");
-            filtered_year_data = get_year_to_data();
+            h = 75, w = 750, xscale = 750 / 40, yscale = 6;
+            graph = d3.select("#histogram").append("svg").attr("height", h).attr("width", w).attr("id", "histogram");
             dx = 0;
 
-            _loop2 = function _loop2(i) {
-              var value = filtered_year_data[i] === undefined ? 0 : filtered_year_data[i].length;
+            _loop4 = function _loop4(i) {
+              var value = year_to_data[i] === undefined ? 0 : year_to_data[i].length;
               var dy = h - value * yscale;
-              graph.append("rect").attr("height", value * yscale).attr("width", xscale).attr("x", dx).attr("y", dy).attr("id", "y_" + i).style("stroke", "black").on("mouseover", function () {
-                var x = d3.select(this).attr("x"),
-                    y = d3.select(this).attr("y") - 20;
-                hist_tooltip.html("<b>" + i + ":</b> " + filtered_year_data[i].length + " shootings ").style("left", x + "px").style("top", y + "px").style("opacity", 1);
-              }).on("mouseout", function () {
-                hist_tooltip.html("").style("opacity", 0);
-              }).on("click", function () {
-                var event = new Event("change");
+              graph.append("rect").attr("height", value * yscale).attr("width", xscale).attr("x", dx).attr("y", dy).attr("id", "y_" + i).on("click", function (d) {
+                console.log("here");
                 document.getElementById("slider").value = i;
-                document.getElementById("slider").dispatchEvent(event);
-              });
-              dx += xscale + 1;
+              }).style("stroke", "black");
+              dx += xscale + 1.5;
             };
 
             for (i = 1982; i < 2020; i++) {
-              _loop2(i);
+              _loop4(i);
             }
 
-            window.addEventListener("resize", resizeHisto);
             highlightYear("all");
 
-          case 11:
+          case 6:
           case "end":
             return _context6.stop();
         }
@@ -1788,7 +1854,6 @@ function _initHistogram() {
 }
 
 function highlightYear(year) {
-  console.log(year);
   var highlight = {
     color: "steelblue",
     opacity: 1
@@ -1803,9 +1868,9 @@ function highlightYear(year) {
       d3.select("#y_" + i).style("fill", highlight.color).style("opacity", highlight.opacity);
     }
   } else if (prevYear === "all") {
-    for (var _i = 1982; _i < 2020; _i++) {
-      if (String(_i) !== year) {
-        d3.select("#y_" + _i).style("fill", def.color).style("opacity", def.opacity);
+    for (var _i2 = 1982; _i2 < 2020; _i2++) {
+      if (String(_i2) !== year) {
+        d3.select("#y_" + _i2).style("fill", def.color).style("opacity", def.opacity);
       }
     }
   } else {
@@ -1849,10 +1914,6 @@ function _init() {
             return initFilter();
 
           case 11:
-            _context7.next = 13;
-            return d3.select("#info").html("<h3>You can explore the " + "data by year with the slider below, by " + "category with the modal above, zoom in and out" + " of the map, and click on a specific incident for more details.</h3>");
-
-          case 13:
           case "end":
             return _context7.stop();
         }
@@ -1862,37 +1923,8 @@ function _init() {
   return _init.apply(this, arguments);
 }
 
-function get_year_to_data() {
-  // this just filters it
-  var data = filterData();
-  var ret = [];
-
-  for (var i = 0; i < data.length; i++) {
-    if (ret[data[i].year] === undefined) {
-      ret[data[i].year] = [data[i]];
-    } else {
-      ret[data[i].year].push(data[i]);
-    }
-  }
-
-  return ret;
-} // resize function for histogram
-
-
-function resizeHisto() {
-  var currentWidth = parseInt(d3.select("#slider").style("width"), 10);
-  var w = currentWidth,
-      xscale = w / 40;
-  var graph = d3.select("#histogram").attr("width", w);
-  var svg = d3.select("#svg-histogram").attr("width", w);
-  var histo = d3.select("#svg-histogram").selectAll("rect").attr("width", xscale);
-  histo.selectAll("rect").each(function (d, i) {
-    d3.select(this).attr("x", xscale * i);
-  });
-}
-
 init();
-},{"regenerator-runtime":"../node_modules/regenerator-runtime/runtime.js","./us-states.json":"us-states.json","./data.csv":"data.csv"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"regenerator-runtime/runtime":"../node_modules/regenerator-runtime/runtime.js","./us-states.json":"us-states.json","./data.csv":"data.csv"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -1920,7 +1952,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "52590" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50662" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
@@ -2096,5 +2128,5 @@ function hmrAcceptRun(bundle, id) {
     return true;
   }
 }
-},{}]},{},["../node_modules/parcel-bundler/src/builtins/hmr-runtime.js","map.js"], null)
-//# sourceMappingURL=/map.27237bf4.js.map
+},{}]},{},["../node_modules/parcel-bundler/src/builtins/hmr-runtime.js","legend.js"], null)
+//# sourceMappingURL=/legend.7d4db14e.js.map
