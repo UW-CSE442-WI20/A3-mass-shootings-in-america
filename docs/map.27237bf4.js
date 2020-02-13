@@ -1456,46 +1456,70 @@ function _renderMap() {
             map.append("text").attr("x", "675.0748626338498").attr("y", "437").attr("text-anchor", "middle").attr("font-size", "10px").attr("style", "font-family: Arial, Helvetica, sans-serif").text("Alabama");
             map.selectAll("path").data(topojson.feature(topology, topology.objects.states).features).enter().append("text").attr("x", function (d) {
               // maually fixing display
-              if (d.properties.name == "Michigan") {
-                return path.centroid(d)[0] + 20;
-              } else if (d.properties.name == "Florida") {
-                return path.centroid(d)[0] + 25;
-              }
+              switch (d.properties.name) {
+                case "Michigan":
+                  return path.centroid(d)[0] + 20;
 
-              if (d.properties.name == "New Hampshire" || d.properties.name == "Rhode Island" || d.properties.name == "Connecticut" || d.properties.name == "Rhode Island") {
-                return path.centroid(d)[0] + 60;
-              }
+                case "Florida":
+                  return path.centroid(d)[0] + 25;
 
-              if (d.properties.name == "District of Columbia") {
-                return path.centroid(d)[0] + 85;
-              }
+                case "New Hampshire":
+                  return path.centroid(d)[0] + 51;
 
-              if (d.properties.name == "Massachusetts") {
-                return path.centroid(d)[0] + 65;
-              }
+                case "Connecticut":
+                  return path.centroid(d)[0] + 45;
 
-              if (d.properties.name == "Delaware") {
-                return path.centroid(d)[0] + 50;
-              }
+                case "Rhode Island":
+                  return path.centroid(d)[0] + 35;
 
-              if (d.properties.name == "New Jersey") {
-                return path.centroid(d)[0] + 55;
-              }
+                case "District of Columbia":
+                  return path.centroid(d)[0] + 85;
 
-              return path.centroid(d)[0];
+                case "Massachusetts":
+                  return path.centroid(d)[0] + 49;
+
+                case "Delaware":
+                  return path.centroid(d)[0] + 50;
+
+                case "New Jersey":
+                  return path.centroid(d)[0] + 50;
+
+                default:
+                  return path.centroid(d)[0];
+              }
             }).attr("y", function (d) {
-              if (d.properties.name == "Michigan") {
-                return path.centroid(d)[1] + 25;
-              } else if (d.properties.name == "Florida") {
-                return path.centroid(d)[1] + 25;
-              }
+              switch (d.properties.name) {
+                case "Michigan":
+                  return path.centroid(d)[1] + 25;
 
-              if (d.properties.name == "New Hampshire" || d.properties.name == "Rhode Island" || d.properties.name == "Connecticut" || d.properties.name == "District of Columbia" || d.properties.name == "New Jersey" || d.properties.name == "Massachusetts" || d.properties.name == "Delaware" || d.properties.name == "Rhode Island") {
-                return path.centroid(d)[1] + 32;
-              }
+                case "Florida":
+                  return path.centroid(d)[1] + 25;
 
-              return path.centroid(d)[1];
-            }).attr("text-anchor", "middle").attr("font-size", "10px").attr("style", "font-family: Arial, Helvetica, sans-serif").attr("fill", function (d) {
+                case "New Hampshire":
+                  return path.centroid(d)[1] + 15;
+
+                case "Connecticut":
+                  return path.centroid(d)[1] + 30;
+
+                case "Rhode Island":
+                  return path.centroid(d)[1] + 20;
+
+                case "District of Columbia":
+                  return path.centroid(d)[1] + 40;
+
+                case "Massachusetts":
+                  return path.centroid(d)[1];
+
+                case "Delaware":
+                  return path.centroid(d)[1] + 15;
+
+                case "New Jersey":
+                  return path.centroid(d)[1] + 15;
+
+                default:
+                  return path.centroid(d)[1];
+              }
+            }).attr("text-anchor", "middle").attr("font-size", "9px").attr("style", "font-family: Arial, Helvetica, sans-serif").attr("fill", function (d) {
               if (d.properties.name == "Hawaii" || d.properties.name == "New Hampshire" || d.properties.name == "Rhode Island" || d.properties.name == "Connecticut" || d.properties.name == "District of Columbia" || d.properties.name == "New Jersey" || d.properties.name == "Massachusetts" || d.properties.name == "Delaware") {
                 return "white";
               }
@@ -1505,7 +1529,7 @@ function _renderMap() {
               }
             }).attr("stroke-width", function (d) {
               if (d.properties.name == "New Hampshire" || d.properties.name == "Rhode Island" || d.properties.name == "Connecticut" || d.properties.name == "District of Columbia" || d.properties.name == "New Jersey" || d.properties.name == "Massachusetts" || d.properties.name == "Delaware") {
-                return "0.5px";
+                return "0.2px";
               } else if (d.properties.name == "Hawaii") return "0.1px";
             }).text(function (d) {
               // Manually erasing states names that are hard to display
@@ -1518,15 +1542,31 @@ function _renderMap() {
 
               return 0;
             }).attr("x2", function (d) {
-              if (d.properties.name == "New Hampshire" || d.properties.name == "Rhode Island" || d.properties.name == "Connecticut" || d.properties.name == "New Jersey" || d.properties.name == "Massachusetts" || d.properties.name == "Delaware") {
-                return path.centroid(d)[0] + 27;
-              }
+              switch (d.properties.name) {
+                case "New Hampshire":
+                  return path.centroid(d)[0] + 15;
 
-              if (d.properties.name == "District of Columbia") {
-                return path.centroid(d)[0] + 40;
-              }
+                case "Connecticut":
+                  return path.centroid(d)[0] + 20;
 
-              return 0;
+                case "Rhode Island":
+                  return path.centroid(d)[0] + 11;
+
+                case "District of Columbia":
+                  return path.centroid(d)[0] + 45;
+
+                case "Massachusetts":
+                  return path.centroid(d)[0] + 20;
+
+                case "Delaware":
+                  return path.centroid(d)[0] + 30;
+
+                case "New Jersey":
+                  return path.centroid(d)[0] + 25;
+
+                default:
+                  return 0;
+              }
             }).attr("y1", function (d) {
               if (d.properties.name == "New Hampshire" || d.properties.name == "Rhode Island" || d.properties.name == "Connecticut" || d.properties.name == "District of Columbia" || d.properties.name == "New Jersey" || d.properties.name == "Massachusetts" || d.properties.name == "Delaware") {
                 return path.centroid(d)[1];
@@ -1534,11 +1574,31 @@ function _renderMap() {
 
               return 0;
             }).attr("y2", function (d) {
-              if (d.properties.name == "New Hampshire" || d.properties.name == "Rhode Island" || d.properties.name == "Connecticut" || d.properties.name == "District of Columbia" || d.properties.name == "New Jersey" || d.properties.name == "Massachusetts" || d.properties.name == "Delaware") {
-                return path.centroid(d)[1] + 25;
-              }
+              switch (d.properties.name) {
+                case "New Hampshire":
+                  return path.centroid(d)[1] + 10;
 
-              return 0;
+                case "Connecticut":
+                  return path.centroid(d)[1] + 25;
+
+                case "Rhode Island":
+                  return path.centroid(d)[1] + 15;
+
+                case "District of Columbia":
+                  return path.centroid(d)[1] + 35;
+
+                case "Massachusetts":
+                  return path.centroid(d)[1] - 2;
+
+                case "Delaware":
+                  return path.centroid(d)[1] + 12;
+
+                case "New Jersey":
+                  return path.centroid(d)[1] + 10;
+
+                default:
+                  0;
+              }
             }).attr("stroke", "yellow").attr("stroke-width", 1).attr("opacity", 0.8);
 
             _loop = function _loop(j) {
@@ -1679,7 +1739,7 @@ function _initFilter() {
             location_state_filter = document.getElementById("select_state");
             filters.location_state.forEach(function (element) {
               var option = document.createElement("option");
-              option.setAttribute("value", element);
+              option.setAttribute("value", element + " fdksl;fd");
               option.innerText = element;
               location_state_filter.appendChild(option);
             });
@@ -2017,7 +2077,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "59178" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "57034" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

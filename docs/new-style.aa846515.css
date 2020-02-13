@@ -21,10 +21,11 @@ body {
 
 .side-by-side .col-1 {
   position: relative;
-  width: 84%;
+  width: 88%;
   margin-right: 1%;
   flex-grow: 20;
   transition: all 1s;
+  overflow-x: visible;
 }
 
 .side-by-side .col-2 {

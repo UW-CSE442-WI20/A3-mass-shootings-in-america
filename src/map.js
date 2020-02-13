@@ -245,60 +245,55 @@ async function renderMap() {
     .append("text")
     .attr("x", function(d) {
       // maually fixing display
-      if (d.properties.name == "Michigan") {
-        return path.centroid(d)[0] + 20;
-      } else if (d.properties.name == "Florida") {
-        return path.centroid(d)[0] + 25;
+      switch (d.properties.name) {
+        case "Michigan":
+          return path.centroid(d)[0] + 20;
+        case "Florida":
+          return path.centroid(d)[0] + 25;
+        case "New Hampshire":
+          return path.centroid(d)[0] + 51;
+        case "Connecticut":
+          return path.centroid(d)[0] + 45;
+        case "Rhode Island":
+          return path.centroid(d)[0] + 35;
+        case "District of Columbia":
+          return path.centroid(d)[0] + 85;
+        case "Massachusetts":
+          return path.centroid(d)[0] + 49;
+        case "Delaware":
+          return path.centroid(d)[0] + 50;
+        case "New Jersey":
+          return path.centroid(d)[0] + 50;
+        default:
+          return path.centroid(d)[0];
       }
-
-      if (
-        d.properties.name == "New Hampshire" ||
-        d.properties.name == "Rhode Island" ||
-        d.properties.name == "Connecticut" ||
-        d.properties.name == "Rhode Island"
-      ) {
-        return path.centroid(d)[0] + 60;
-      }
-      if (d.properties.name == "District of Columbia") {
-        return path.centroid(d)[0] + 85;
-      }
-
-      if (d.properties.name == "Massachusetts") {
-        return path.centroid(d)[0] + 65;
-      }
-      if (d.properties.name == "Delaware") {
-        return path.centroid(d)[0] + 50;
-      }
-      if (d.properties.name == "New Jersey") {
-        return path.centroid(d)[0] + 55;
-      }
-
-      return path.centroid(d)[0];
     })
     .attr("y", function(d) {
-      if (d.properties.name == "Michigan") {
-        return path.centroid(d)[1] + 25;
-      } else if (d.properties.name == "Florida") {
-        return path.centroid(d)[1] + 25;
+      switch (d.properties.name) {
+        case "Michigan":
+          return path.centroid(d)[1] + 25;
+        case "Florida":
+          return path.centroid(d)[1] + 25;
+        case "New Hampshire":
+          return path.centroid(d)[1] + 15;
+        case "Connecticut":
+          return path.centroid(d)[1] + 30;
+        case "Rhode Island":
+          return path.centroid(d)[1] + 20;
+        case "District of Columbia":
+          return path.centroid(d)[1] + 40;
+        case "Massachusetts":
+          return path.centroid(d)[1];
+        case "Delaware":
+          return path.centroid(d)[1] + 15;
+        case "New Jersey":
+          return path.centroid(d)[1] + 15;
+        default:
+          return path.centroid(d)[1];
       }
-
-      if (
-        d.properties.name == "New Hampshire" ||
-        d.properties.name == "Rhode Island" ||
-        d.properties.name == "Connecticut" ||
-        d.properties.name == "District of Columbia" ||
-        d.properties.name == "New Jersey" ||
-        d.properties.name == "Massachusetts" ||
-        d.properties.name == "Delaware" ||
-        d.properties.name == "Rhode Island"
-      ) {
-        return path.centroid(d)[1] + 32;
-      }
-
-      return path.centroid(d)[1];
     })
     .attr("text-anchor", "middle")
-    .attr("font-size", "10px")
+    .attr("font-size", "9px")
     .attr("style", "font-family: Arial, Helvetica, sans-serif")
     .attr("fill", function(d) {
       if (
@@ -338,12 +333,11 @@ async function renderMap() {
         d.properties.name == "Massachusetts" ||
         d.properties.name == "Delaware"
       ) {
-        return "0.5px";
+        return "0.2px";
       } else if (d.properties.name == "Hawaii") return "0.1px";
     })
     .text(function(d) {
       // Manually erasing states names that are hard to display
-
       return d.properties.name;
     });
 
@@ -367,20 +361,24 @@ async function renderMap() {
       return 0;
     })
     .attr("x2", function(d) {
-      if (
-        d.properties.name == "New Hampshire" ||
-        d.properties.name == "Rhode Island" ||
-        d.properties.name == "Connecticut" ||
-        d.properties.name == "New Jersey" ||
-        d.properties.name == "Massachusetts" ||
-        d.properties.name == "Delaware"
-      ) {
-        return path.centroid(d)[0] + 27;
+      switch (d.properties.name) {
+        case "New Hampshire":
+          return path.centroid(d)[0] + 15;
+        case "Connecticut":
+          return path.centroid(d)[0] + 20;
+        case "Rhode Island":
+          return path.centroid(d)[0] + 11;
+        case "District of Columbia":
+          return path.centroid(d)[0] + 45;
+        case "Massachusetts":
+          return path.centroid(d)[0] + 20;
+        case "Delaware":
+          return path.centroid(d)[0] + 30;
+        case "New Jersey":
+          return path.centroid(d)[0] + 25;
+        default:
+          return 0;
       }
-      if (d.properties.name == "District of Columbia") {
-        return path.centroid(d)[0] + 40;
-      }
-      return 0;
     })
     .attr("y1", function(d) {
       if (
@@ -397,18 +395,24 @@ async function renderMap() {
       return 0;
     })
     .attr("y2", function(d) {
-      if (
-        d.properties.name == "New Hampshire" ||
-        d.properties.name == "Rhode Island" ||
-        d.properties.name == "Connecticut" ||
-        d.properties.name == "District of Columbia" ||
-        d.properties.name == "New Jersey" ||
-        d.properties.name == "Massachusetts" ||
-        d.properties.name == "Delaware"
-      ) {
-        return path.centroid(d)[1] + 25;
+      switch (d.properties.name) {
+        case "New Hampshire":
+          return path.centroid(d)[1] + 10;
+        case "Connecticut":
+          return path.centroid(d)[1] + 25;
+        case "Rhode Island":
+          return path.centroid(d)[1] + 15;
+        case "District of Columbia":
+          return path.centroid(d)[1] + 35;
+        case "Massachusetts":
+          return path.centroid(d)[1] - 2;
+        case "Delaware":
+          return path.centroid(d)[1] + 12;
+        case "New Jersey":
+          return path.centroid(d)[1] + 10;
+        default:
+          0;
       }
-      return 0;
     })
     .attr("stroke", "yellow")
     .attr("stroke-width", 1)
@@ -568,7 +572,7 @@ async function initFilter() {
   var location_state_filter = document.getElementById("select_state");
   filters.location_state.forEach(element => {
     let option = document.createElement("option");
-    option.setAttribute("value", element);
+    option.setAttribute("value", element + " fdksl;fd");
     option.innerText = element;
     location_state_filter.appendChild(option);
   });
