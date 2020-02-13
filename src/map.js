@@ -207,45 +207,88 @@ async function renderMap() {
     .attr("class", "map")
     .attr("d", path(topojson.feature(topology, topology.objects.states)));
 
-  // Adding states names to display at the center
-  map
-    .selectAll("path")
-    .data(topojson.feature(topology, topology.objects.states).features)
-    .enter()
-    .append("text")
-    .attr("x", function(d) {
-      // maually fixing display
-      if (d.properties.name == "Michigan") {
-        return path.centroid(d)[0] + 20;
-      } else if (d.properties.name == "Hawaii") {
-      }
-      return path.centroid(d)[0];
-    })
-    .attr("y", function(d) {
-      if (d.properties.name == "Michigan") {
-        return path.centroid(d)[1] + 25;
-      } else if (d.properties.name == "Hawaii") {
-      }
-      return path.centroid(d)[1];
-    })
-    .attr("text-anchor", "middle")
-    .attr("font-size", "10px")
-    .attr("font-family", "Arial, Helvetica, sans-serif")
-    .text(function(d) {
-      // Manually erasing states names that are hard to display
-      if (
-        d.properties.name != "New Hampshire" &&
-        d.properties.name != "Rhode Island" &&
-        d.properties.name != "Connecticut" &&
-        d.properties.name != "District of Columbia" &&
-        d.properties.name != "New Jersey" &&
-        d.properties.name != "Massachusetts" &&
-        d.properties.name != "Delaware" &&
-        d.properties.name != "Florida"
-      ) {
-        return d.properties.name;
-      }
-    });
+    // Adding states names to display at the center
+    map
+      .selectAll("path")
+      .data(topojson.feature(topology, topology.objects.states).features)
+      .enter()
+      .append("text")
+      .attr("x", function(d) {
+        // maually fixing display
+        console.log(d.properties);
+        if (d.properties.name == "Michigan") {
+          return path.centroid(d)[0] + 20;
+        } else if (d.properties.name == "Florida") {
+          return path.centroid(d)[0] + 25;
+        } else if (d.properties.name == "New Hampshire") {
+          return 105;
+        }
+        return path.centroid(d)[0];
+      })
+      .attr("y", function(d) {
+        if (d.properties.name == "Michigan") {
+          return path.centroid(d)[1] + 25;
+        } else if (d.properties.name == "Florida") {
+          return path.centroid(d)[1] + 25;
+        } else if (d.properties.name == "New Hampshire") {
+          return 515;
+        }
+        return path.centroid(d)[1];
+      })
+      .attr("text-anchor", "middle")
+      .attr("font-size", "10px")
+      .attr("style", "font-family: Arial, Helvetica, sans-serif")
+      .attr("fill", function(d) {
+        if (d.properties.name == "Hawaii" || d.properties.name == "New Hampshire" &&
+                d.properties.name == "Rhode Island" ||
+               d.properties.name == "Connecticut" ||
+               d.properties.name == "District of Columbia" ||
+                d.properties.name == "New Jersey" ||
+                d.properties.name == "Massachusetts" ||
+                d.properties.name == "Delaware") {
+          return "white";
+        }
+      })
+      .attr("stroke", function(d) {
+        if (d.properties.name == "Hawaii" || d.properties.name == "New Hampshire" &&
+                d.properties.name == "Rhode Island" ||
+               d.properties.name == "Connecticut" ||
+               d.properties.name == "District of Columbia" ||
+                d.properties.name == "New Jersey" ||
+                d.properties.name == "Massachusetts" ||
+                d.properties.name == "Delaware") {
+          return "black";
+        }
+      })
+      .attr("stroke-width", function(d) {
+        if (d.properties.name == "New Hampshire" &&
+                d.properties.name == "Rhode Island" ||
+               d.properties.name == "Connecticut" ||
+               d.properties.name == "District of Columbia" ||
+                d.properties.name == "New Jersey" ||
+                d.properties.name == "Massachusetts" ||
+                d.properties.name == "Delaware") {
+          return "0.5px";
+        } else if (d.properties.name == "Hawaii")
+        return "0.1px";
+      })
+      .text(function(d) {
+        // Manually erasing states names that are hard to display
+        if (d.properties.name == "New Hampshire") {
+          return "Alaska";
+        }
+        //if (
+    //        d.properties.name != "New Hampshire" &&
+    //        d.properties.name != "Rhode Island" &&
+    //        d.properties.name != "Connecticut" &&
+    //        d.properties.name != "District of Columbia" &&
+    //        d.properties.name != "New Jersey" &&
+    //        d.properties.name != "Massachusetts" &&
+    //        d.properties.name != "Delaware"
+    //      ) {
+          return d.properties.name;
+    //      }
+      });
 
   for (let j = 0; j < data.length; j++) {
     let row = data[j];
@@ -396,7 +439,7 @@ async function initFilter() {
     selected_filters.race = $(this).val();
     renderMap();
     initHistogram();
-    
+
   });
 
   var location_state_filter = document.getElementById("select_state");
