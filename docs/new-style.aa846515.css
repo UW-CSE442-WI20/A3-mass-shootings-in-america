@@ -1,9 +1,12 @@
 @keyframes slide {
-  to {
+  0% {
     left: 0px;
   }
-  from {
-    left: 50%;
+  50% {
+    left: 20px;
+  }
+  100% {
+    left: 50px;
   }
 }
 
@@ -32,17 +35,12 @@ body {
   position: relative;
   width: 88%;
   margin-right: 1%;
-  flex-grow: 20;
-  transform-origin: left;
-  transition: slide 0.3s;
   overflow-x: visible;
 }
 
 .side-by-side .col-2 {
   width: 15%;
   position: relative;
-  flex-grow: 100;
-  transition: all 20s;
 }
 
 #map {
@@ -144,7 +142,7 @@ body {
   border-color: steelblue;
   border-radius: 30px;
   max-height: 600px;
-  width: 350px;
+  width: 300px;
 }
 
 .info_panel .title {

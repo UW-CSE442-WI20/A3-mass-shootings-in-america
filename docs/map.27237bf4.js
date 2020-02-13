@@ -1476,7 +1476,7 @@ function _renderMap() {
                   return path.centroid(d)[0] + 85;
 
                 case "Massachusetts":
-                  return path.centroid(d)[0] + 49;
+                  return path.centroid(d)[0] + 48;
 
                 case "Delaware":
                   return path.centroid(d)[0] + 50;
@@ -1638,7 +1638,7 @@ function zoomed() {
 }
 
 function closePanel() {
-  d3.select("#info").style("opacity", 0.6).transition().duration(300).style("opacity", 0).on("end", function () {
+  d3.select("#info").style("opacity", 0.7).transition().duration(300).style("opacity", 0).on("end", function () {
     d3.select("#info").html("");
   });
 }
@@ -1658,7 +1658,7 @@ function openPanel(pointData) {
   var fat = pointData.fatalities,
       inj = pointData.injured;
   var content = "<div class=info_panel><div class=title>" + pointData.case + "</div><br><div class=info>" + "<i class=material-icons style=font-size:14px;color:black;>location_on</i>  " + pointData.location + "<br><i class=material-icons style=font-size:14px;color:black;>date_range</i>  " + pointData.date + "</div><div class=stat-container>" + "<div class=stat><div class=cat>Fatalities<br><h6>" + fat + "</h6></div>" + "<div class=count>" + victimCount(fat, "darkred") + "</div></div>" + "<div class=stat><div class=cat>Injured<br><h6>" + inj + "</h6></div>" + "<stat class=count>" + victimCount(inj, "orangered") + "</div></div><div class=desc>" + pointData.summary + "<br><center><br><button id=wb class=btn>X</button></div>";
-  d3.select("#info").html(content).style("opacity", 0).style("height", 0).transition().duration(700).style("opacity", 0.6).style("height", "auto");
+  d3.select("#info").html(content).style("opacity", 0).style("height", 0).transition().duration(700).style("opacity", 0.7).style("height", "auto");
   document.getElementById("wb").addEventListener("click", closePanel);
 }
 
@@ -2008,6 +2008,9 @@ function _init() {
             return initFilter();
 
           case 11:
+            d3.select("#init_exit").on("click", closePanel);
+
+          case 12:
           case "end":
             return _context8.stop();
         }
@@ -2075,7 +2078,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "61222" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55628" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

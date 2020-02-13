@@ -43,24 +43,24 @@ h3 {
   margin: 5px;
   animation-name: fadeIn;
   animation-iteration-count: 1;
-  animation-duration: 15s;
+  animation-duration: 12s;
   animation-fill-mode: forwards;
   margin-bottom: -1em;
 }
 
 h3.a {
   opacity: 0;
-  animation-delay: 1.5s;
+  animation-delay: 1s;
 }
 
 h3.b {
   opacity: 0;
-  animation-delay: 3s;
+  animation-delay: 2s;
 }
 
 h3.c {
   opacity: 0;
-  animation-delay: 4.5s;
+  animation-delay: 3s;
 }
 
 h4 {
@@ -83,6 +83,32 @@ h6 {
   font-weight: bold;
   margin-top: 0em;
   font-size: 12pt;
+}
+
+.box {
+  display: block;
+  border-radius: 10px;
+  border-color: white;
+  border-width: 2px;
+  padding: 5px;
+  position: relative;
+  opacity: 1;
+}
+
+.bttn {
+  opacity: 0;
+  font-weight: bold;
+  height: 20px;
+  background-color: whitesmoke;
+  border-radius: 10px;
+  animation-name: fadeIn;
+  animation-iteration-count: 1;
+  animation-duration: 5s;
+  animation-delay: 4s;
+  animation-fill-mode: forwards;
+  padding: 2px;
+  margin-bottom: 2em;
+  line-height: 1px;
 }
 
 hr {

@@ -259,7 +259,7 @@ async function renderMap() {
         case "District of Columbia":
           return path.centroid(d)[0] + 85;
         case "Massachusetts":
-          return path.centroid(d)[0] + 49;
+          return path.centroid(d)[0] + 48;
         case "Delaware":
           return path.centroid(d)[0] + 50;
         case "New Jersey":
@@ -465,7 +465,7 @@ function zoomed() {
 
 function closePanel() {
   d3.select("#info")
-    .style("opacity", 0.6)
+    .style("opacity", 0.7)
     .transition()
     .duration(300)
     .style("opacity", 0)
@@ -519,7 +519,7 @@ function openPanel(pointData) {
     .style("height", 0)
     .transition()
     .duration(700)
-    .style("opacity", 0.6)
+    .style("opacity", 0.7)
     .style("height", "auto");
 
   document.getElementById("wb").addEventListener("click", closePanel);
@@ -797,6 +797,7 @@ async function init() {
   await initHistogram();
   await initSlider();
   await initFilter();
+  d3.select("#init_exit").on("click", closePanel);
 }
 
 function get_year_to_data() {

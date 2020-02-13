@@ -39,28 +39,32 @@
 				<button style="position: absolute;top: 15px;right: 10px;" type="button" class="btn btn-info btn-lg"
 					data-toggle="modal" data-target="#myModal"><i class="fa fa-filter" aria-hidden="true"></i></button>
 				<div id="info">
-					<h3>Explore the map by panning + zooming.</h3><br>
-					<h3 class=a>Browse filter options with the button above.</h3><br>
-					<h3 class=b>Use the slider below to navigate by year.</h3><br>
-					<h3 class=c>Click on an incident point for more details.</h3>
+					<div class="box">
+						<h3>Explore the map by panning + zooming.</h3><br>
+						<h3 class=a>Browse filter options with the button above.</h3><br>
+						<h3 class=b>Use the slider below to navigate by year.</h3><br>
+						<h3 class=c>Click on an incident point for more details.</h3><br><br>
+						<button id=init_exit class=bttn>Got It &#10004 </button>
+					</div>
 				</div>
 			</div>
 		</div>
-		<br />
-		<!--Histoslider-->
-		<div class="side-by-side">
-			<div class="col-1">
-				<form id="slider_container" style="width: 750px;">
-					<label id="slider_year" for="Slider" style="color: white;"></label>
-					<div id="histogram"></div>
-					<input type="range" class="custom-range" step="1" id="slider">
-				</form>
-			</div>
-
-			<div class="col-2">
-				<button id="all_years_button">Show All Years</button>
-			</div>
+	</div>
+	<br />
+	<!--Histoslider-->
+	<div class="side-by-side">
+		<div class="col-1">
+			<form id="slider_container" style="width: 750px;">
+				<label id="slider_year" for="Slider" style="color: white;"></label>
+				<div id="histogram"></div>
+				<input type="range" class="custom-range" step="1" id="slider">
+			</form>
 		</div>
+
+		<div class="col-2">
+			<button id="all_years_button">Show All Years</button>
+		</div>
+	</div>
 	</div>
 	<!-- Modal -->
 	<div class="modal fade" id="myModal" role="dialog">
