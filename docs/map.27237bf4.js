@@ -1363,7 +1363,7 @@ function _parseData() {
                 }, _callee);
               }));
 
-              return function (_x) {
+              return function (_x2) {
                 return _ref.apply(this, arguments);
               };
             }());
@@ -1383,12 +1383,12 @@ function _parseData() {
   return _parseData.apply(this, arguments);
 }
 
-function filterData() {
-  if (curData === undefined) {
+function filterData(data) {
+  if (data === undefined) {
     return [];
   }
 
-  var filteredData = curData;
+  var filteredData = data;
   filteredData = selected_filters.race.length > 0 ? filteredData.filter(function (row) {
     return selected_filters.race.includes(row.race);
   }) : filteredData;
@@ -1439,7 +1439,7 @@ function _renderMap() {
           case 0:
             // Initialize svg object
             document.getElementById("map").innerHTML = "";
-            data = filterData();
+            data = filterData(curData);
             map = d3.select("#map").append("svg").attr("width", width).attr("height", height).attr("id", "map").append("g");
             tooltip = d3.select("#map").append("div").attr("class", "tooltip");
             zoom = d3.zoom().scaleExtent([1, 8]).on("zoom", zoomed);
@@ -1738,7 +1738,7 @@ function _initHistogram() {
   _initHistogram = _asyncToGenerator(
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee6() {
-    var currentWidth, h, w, xscale, yscale, graph, filtered_year_data, dx, _loop2, i;
+    var currentWidth, h, w, xscale, yscale, graph, filtered_year_data, dx, _loop2, i, event;
 
     return regeneratorRuntime.wrap(function _callee6$(_context6) {
       while (1) {
@@ -1777,7 +1777,14 @@ function _initHistogram() {
             window.addEventListener("resize", resizeHisto);
             highlightYear("all");
 
-          case 11:
+            if (document.getElementById("slider_year").innerText !== "All Years") {
+              event = new Event("change");
+              document.getElementById("slider").dispatchEvent(event);
+            }
+
+            ;
+
+          case 13:
           case "end":
             return _context6.stop();
         }
@@ -1787,33 +1794,54 @@ function _initHistogram() {
   return _initHistogram.apply(this, arguments);
 }
 
-function highlightYear(year) {
-  console.log(year);
-  var highlight = {
-    color: "steelblue",
-    opacity: 1
-  };
-  var def = {
-    color: "lightgray",
-    opacity: 0.4
-  };
+function highlightYear(_x) {
+  return _highlightYear.apply(this, arguments);
+}
 
-  if (year === "all") {
-    for (var i = 1982; i < 2020; i++) {
-      d3.select("#y_" + i).style("fill", highlight.color).style("opacity", highlight.opacity);
-    }
-  } else if (prevYear === "all") {
-    for (var _i = 1982; _i < 2020; _i++) {
-      if (String(_i) !== year) {
-        d3.select("#y_" + _i).style("fill", def.color).style("opacity", def.opacity);
+function _highlightYear() {
+  _highlightYear = _asyncToGenerator(
+  /*#__PURE__*/
+  regeneratorRuntime.mark(function _callee7(year) {
+    var highlight, def, i, _i;
+
+    return regeneratorRuntime.wrap(function _callee7$(_context7) {
+      while (1) {
+        switch (_context7.prev = _context7.next) {
+          case 0:
+            highlight = {
+              color: "steelblue",
+              opacity: 1
+            };
+            def = {
+              color: "lightgray",
+              opacity: 0.4
+            };
+
+            if (year === "all") {
+              for (i = 1982; i < 2020; i++) {
+                d3.select("#y_" + i).style("fill", highlight.color).style("opacity", highlight.opacity);
+              }
+            } else if (prevYear === "all") {
+              for (_i = 1982; _i < 2020; _i++) {
+                if (String(_i) !== year) {
+                  d3.select("#y_" + _i).style("fill", def.color).style("opacity", def.opacity);
+                }
+              }
+            } else {
+              d3.select("#y_" + prevYear).style("fill", def.color).style("opacity", def.opacity);
+              d3.select("#y_" + year).style("fill", highlight.color).style("opacity", highlight.opacity);
+            }
+
+            prevYear = year;
+
+          case 4:
+          case "end":
+            return _context7.stop();
+        }
       }
-    }
-  } else {
-    d3.select("#y_" + prevYear).style("fill", def.color).style("opacity", def.opacity);
-    d3.select("#y_" + year).style("fill", highlight.color).style("opacity", highlight.opacity);
-  }
-
-  prevYear = year;
+    }, _callee7);
+  }));
+  return _highlightYear.apply(this, arguments);
 }
 
 function init() {
@@ -1823,48 +1851,48 @@ function init() {
 function _init() {
   _init = _asyncToGenerator(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee7() {
-    return regeneratorRuntime.wrap(function _callee7$(_context7) {
+  regeneratorRuntime.mark(function _callee8() {
+    return regeneratorRuntime.wrap(function _callee8$(_context8) {
       while (1) {
-        switch (_context7.prev = _context7.next) {
+        switch (_context8.prev = _context8.next) {
           case 0:
-            _context7.next = 2;
+            _context8.next = 2;
             return parseData();
 
           case 2:
             curData = allData;
-            _context7.next = 5;
+            _context8.next = 5;
             return renderMap();
 
           case 5:
-            _context7.next = 7;
+            _context8.next = 7;
             return initHistogram();
 
           case 7:
-            _context7.next = 9;
+            _context8.next = 9;
             return initSlider();
 
           case 9:
-            _context7.next = 11;
+            _context8.next = 11;
             return initFilter();
 
           case 11:
-            _context7.next = 13;
+            _context8.next = 13;
             return d3.select("#info").html("<h3>You can explore the " + "data by year with the slider below, by " + "category with the modal above, zoom in and out" + " of the map, and click on a specific incident for more details.</h3>");
 
           case 13:
           case "end":
-            return _context7.stop();
+            return _context8.stop();
         }
       }
-    }, _callee7);
+    }, _callee8);
   }));
   return _init.apply(this, arguments);
 }
 
 function get_year_to_data() {
   // this just filters it
-  var data = filterData();
+  var data = filterData(allData);
   var ret = [];
 
   for (var i = 0; i < data.length; i++) {
@@ -1920,7 +1948,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "52590" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55458" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
