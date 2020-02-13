@@ -143,9 +143,7 @@ function filterData() {
   filteredData =
     selected_filters.age.length > 0
       ? filteredData.filter(row =>
-          selected_filters.age.includes(
-            "" + row.age_of_shooter.substring(0,1)
-          )
+          selected_filters.age.includes("" + row.age_of_shooter.substring(0, 1))
         )
       : filteredData;
   filteredData =
@@ -184,7 +182,6 @@ async function renderMap() {
     .select("#map")
     .append("div")
     .attr("class", "tooltip");
-  info = d3.select("#info_panel").style("opacity", 0);
   zoom = d3
     .zoom()
     .scaleExtent([1, 8])
@@ -210,38 +207,45 @@ async function renderMap() {
     .attr("class", "map")
     .attr("d", path(topojson.feature(topology, topology.objects.states)));
 
-      // Adding states names to display at the center
-      map.selectAll("path")
-          .data(topojson.feature(topology, topology.objects.states).features)
-          .enter().append("text")
-          .attr("x", function(d) {
-            // maually fixing display
-            if(d.properties.name == "Michigan") {
-              return path.centroid(d)[0] + 20;
-            } else if (d.properties.name == "Hawaii") {
-            }
-              return path.centroid(d)[0];
-          })
-          .attr("y", function(d) {
-            if(d.properties.name == "Michigan") {
-              return path.centroid(d)[1] + 25;
-            } else if (d.properties.name == "Hawaii") {
-              
-            }
-              return path.centroid(d)[1];
-          })
-          .attr("text-anchor", "middle")
-          .attr("font-size", "10px")
-          .attr("font-family", "Arial, Helvetica, sans-serif")
-          .text(function(d){
-            // Manually erasing states names that are hard to display
-            if (d.properties.name != "New Hampshire" && d.properties.name != "Rhode Island"
-               && d.properties.name != "Connecticut" && d.properties.name != "District of Columbia"
-              && d.properties.name != "New Jersey" && d.properties.name != "Massachusetts"
-             && d.properties.name != "Delaware"  && d.properties.name != "Florida") {
-              return d.properties.name;
-            }
-          });
+  // Adding states names to display at the center
+  map
+    .selectAll("path")
+    .data(topojson.feature(topology, topology.objects.states).features)
+    .enter()
+    .append("text")
+    .attr("x", function(d) {
+      // maually fixing display
+      if (d.properties.name == "Michigan") {
+        return path.centroid(d)[0] + 20;
+      } else if (d.properties.name == "Hawaii") {
+      }
+      return path.centroid(d)[0];
+    })
+    .attr("y", function(d) {
+      if (d.properties.name == "Michigan") {
+        return path.centroid(d)[1] + 25;
+      } else if (d.properties.name == "Hawaii") {
+      }
+      return path.centroid(d)[1];
+    })
+    .attr("text-anchor", "middle")
+    .attr("font-size", "10px")
+    .attr("font-family", "Arial, Helvetica, sans-serif")
+    .text(function(d) {
+      // Manually erasing states names that are hard to display
+      if (
+        d.properties.name != "New Hampshire" &&
+        d.properties.name != "Rhode Island" &&
+        d.properties.name != "Connecticut" &&
+        d.properties.name != "District of Columbia" &&
+        d.properties.name != "New Jersey" &&
+        d.properties.name != "Massachusetts" &&
+        d.properties.name != "Delaware" &&
+        d.properties.name != "Florida"
+      ) {
+        return d.properties.name;
+      }
+    });
 
   for (let j = 0; j < data.length; j++) {
     let row = data[j];
@@ -289,15 +293,13 @@ function zoomed() {
 }
 
 function closePanel() {
-  d3.select("#info_panel")
+  d3.select("#info")
     .html("")
+    .style("opacity", 1)
     .transition()
-    .duration(1000)
+    .duration(2000)
     .style("opacity", 0)
     .style("height", "0 px");
-  d3.select("#panel_title").html("");
-  d3.select("#info_title").html("");
-  d3.select("#panel_nav").html("");
 }
 
 function victimCount(count, col) {
@@ -311,107 +313,44 @@ function victimCount(count, col) {
   return ret;
 }
 
-function mainScreen(pointData) {
+function openPanel(pointData) {
+  closePanel();
   let fat = pointData.fatalities,
     inj = pointData.injured;
-  return (
-    "Location:" +
+  var content =
+    "<div class=info_panel><div class=title>" +
+    pointData.case +
+    "</div><br><div class=info>" +
+    "<i class=material-icons style=font-size:14px;color:black;>location_on</i>  " +
     pointData.location +
-    "<br>Date: " +
+    "<br><i class=material-icons style=font-size:14px;color:black;>date_range</i>  " +
     pointData.date +
-    "</h4>" +
-    "<h5>" +
-    pointData.summary +
-    "</h5><br><div class =stat>" +
-    "<div class=cat>Fatalties<br><h6>" +
+    "</div><div class=stat-container>" +
+    "<div class=stat><div class=cat>Fatalities<br><h6>" +
     fat +
     "</h6></div>" +
     "<div class=count>" +
     victimCount(fat, "darkred") +
-    "</div></div><br><div class=stat>" +
-    "<div class=cat>Injured<br><h6>" +
+    "</div></div>" +
+    "<div class=stat><div class=cat>Injured<br><h6>" +
     inj +
     "</h6></div>" +
-    "<div class=count>" +
-    victimCount(inj, "black") +
-    "</div></div><br><br>"
-  );
-}
+    "<stat class=count>" +
+    victimCount(inj, "orangered") +
+    "</div></div><div class=desc>" +
+    pointData.summary +
+    "<br><center><br><button id=wb class=btn>X</button></div>";
 
-function altScreen(data) {
-  return (
-    "<h5>Weapons used: <b>" +
-    data.weapon_type +
-    "<br></b>Obtained legally: <b>" +
-    data.weapons_obtained_legally +
-    "</b><br><br><p>Suspect:<b> " +
-    data.summary.split(",")[0] +
-    "</b></p><ul>" +
-    "<li>Age:" +
-    data.age_of_shooter +
-    "<li>Race: " +
-    data.race +
-    "<li>Mental health issues: " +
-    data.prior_signs_mental_health_issues +
-    "</ul></h5>"
-  );
-}
-
-function changeScreen(data, flag) {
-  let content = flag ? altScreen(data) : mainScreen(data);
-  let label = flag ? "Back" : "More Info";
-
-  d3.select("#panel_main").html(content);
-  d3.select("#panel_nav").text(label);
-}
-
-function openPanel(pointData) {
-  closePanel();
-  console.log(pointData);
-  var current = true;
-
-  info
-    .append("div")
-    .attr("class", "title")
-    .attr("id", "panel_title")
-    .html("<p>" + pointData.case + "<hr width=95%>");
-
-  info
-    .append("div")
-    .attr("class", "info")
-    .attr("id", "panel_main")
-    .html(mainScreen(pointData));
-
-  let nav = info.append("div").attr("class", "nav");
-  nav
-    .append("button")
-    .attr("class", "btn")
-    .attr("id", "panel_nav")
-    .text("More Info")
-    .on("click", function() {
-      changeScreen(pointData, current);
-      current = !current;
-    });
-  nav
-    .append("button")
-    .text("Close")
-    .attr("class", "btn")
-    .on("click", closePanel);
-
-  /*"<iframe sandbox=allow-scripts width=" +
-    100 +
-    "% height= " +
-    height / 2 +
-    " src=" +
-    externalLink +
-    "</iframe>";
-    */
-
-  info
+  d3.select("#info")
+    .html(content)
     .style("opacity", 0)
+    .style("height", 0)
     .transition()
-    .duration(500)
-    .style("opacity", 1);
+    .duration(700)
+    .style("opacity", 0.6)
+    .style("height", "auto");
+
+  document.getElementById("wb").addEventListener("click", closePanel);
 }
 
 async function initSlider() {
@@ -563,8 +502,8 @@ async function initFilter() {
     initHistogram();
   });
 
-  document.getElementById("filter_reset").addEventListener("click",function() {
-    $(".selectpicker").val('default');
+  document.getElementById("filter_reset").addEventListener("click", function() {
+    $(".selectpicker").val("default");
     $(".selectpicker").selectpicker("refresh");
     selected_filters = {
       race: [],
@@ -607,7 +546,8 @@ async function initHistogram() {
   let filtered_year_data = get_year_to_data();
   let dx = 0;
   for (let i = 1982; i < 2020; i++) {
-    let value = filtered_year_data[i] === undefined ? 0 : filtered_year_data[i].length;
+    let value =
+      filtered_year_data[i] === undefined ? 0 : filtered_year_data[i].length;
     let dy = h - value * yscale;
 
     graph
@@ -623,7 +563,9 @@ async function initHistogram() {
           y = d3.select(this).attr("y") - 20;
 
         hist_tooltip
-          .html("<b>" + i + ":</b> " + filtered_year_data[i].length + " shootings ")
+          .html(
+            "<b>" + i + ":</b> " + filtered_year_data[i].length + " shootings "
+          )
           .style("left", x + "px")
           .style("top", y + "px")
           .style("opacity", 1);
@@ -681,12 +623,21 @@ async function init() {
   await initHistogram();
   await initSlider();
   await initFilter();
+  await d3
+    .select("#info")
+    .html(
+      "<h3>You can explore the " +
+        "data by year with the slider below, by " +
+        "category with the modal above, zoom in and out" +
+        " of the map, and click on a specific incident for more details.</h3>"
+    );
 }
 
-function get_year_to_data(){ // this just filters it
+function get_year_to_data() {
+  // this just filters it
   let data = filterData();
   let ret = [];
-  for(let i = 0; i < data.length; i++){
+  for (let i = 0; i < data.length; i++) {
     if (ret[data[i].year] === undefined) {
       ret[data[i].year] = [data[i]];
     } else {
